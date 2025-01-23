@@ -73,10 +73,10 @@ def run(programPath: str, outputPath: str, deleteCFile: bool = False) -> None:
 
 def main():
 
-    ast = compile("examples/program.lf", printTokens=False, printSentences=True)
-    write(ast, "examples/program.c", printCProgram=True)
+    ast = compile("examples/test.lf", printTokens=False, printSentences=True)
+    write(ast, "examples/test.c", printCProgram=True)
 
-    #run("examples/program.c", "examples/program", deleteCFile=False)
+    run("examples/test.c", "examples/test", deleteCFile=False)
 
 
 

@@ -1,11 +1,14 @@
 
 import src.compiler.nodes as nodes
+import src.compiler.structures as structures
 import src.parser.sentences as sentences
 
 from src.compiler.passes.scaffoldingPass import ScaffoldingPass, ScaffoldingNode
 from src.compiler.passes.topDeclarationsPass import TopDeclarationsPass
 from src.compiler.transformer import Transformer
 import src.compiler.compilerErrors as compilerErrors
+
+from src.base import BASE_CLASSES
 
 class Compiler:
     
@@ -28,17 +31,32 @@ class Compiler:
         transformer = Transformer()
         root = transformer.transform(scaffoldingRoot)
 
-        print("root children before", root.children)
-
         topDeclarationsPass = TopDeclarationsPass(transformer)
         compilerError = topDeclarationsPass.run(root)
         if isinstance(compilerError, compilerErrors.CompilerError):
             print(compilerError)
             exit(1)
 
-        print("root children after ", root.children)
+        self._setMainFunction(root)
 
-        root: nodes.ScopeNode = root
         return root
         
+
+
+
+    def _setMainFunction(self, root: nodes.ScopeNode) -> None:
+        """Sets the main function to the first function in the root"""
+        
+
+        mainLeafFunction = structures.LeafFunction("main", [], [], structures.LeafMention(None, BASE_CLASSES.INT_CLASS, []))
+        mainLeafFunction.cName = "main"
+
+        mainLeafFunctionNode = nodes.LeafFunctionDeclarationNode(1, root, mainLeafFunction)
+
+        for child in [child for child in root.children if type(child) == nodes.ScaffoldingNode]:
+            root.children.remove(child)
+            mainLeafFunctionNode.children.append(child)
+
+        root.children.append(mainLeafFunctionNode)
+
 
