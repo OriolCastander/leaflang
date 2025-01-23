@@ -1,0 +1,8 @@
+.vscode/
+c_libraries/compiled/
+
+
+**/__pycache__/
+
+examples/*.c
+examples/test.lf
