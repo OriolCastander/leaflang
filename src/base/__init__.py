@@ -5,3 +5,6 @@ from src.base.baseFunctions import BaseFunctions
 
 BASE_CLASSES = BaseClasses()
 BASE_FUNCTIONS = BaseFunctions(BASE_CLASSES)
+
+###KEYWORDS OF THE LANGUAGE
+KEYWORDS = ["class", "def", "main", "var", "let"]

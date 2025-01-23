@@ -11,6 +11,8 @@ import src.compiler.checks.orthographyChecks as orthographyChecks
 
 from src.utils import ALLOCATION, PASSING
 
+from src.base import KEYWORDS
+
 
 class Transformer:
     """Transforms a scaffolding node into a proper node"""
@@ -77,6 +79,8 @@ class Transformer:
         passing = PASSING.REFERENCE
 
         takenClassNames = [structure.name for structure in scaffoldingNode.getAll(structures.LeafClass, recursive=True, includeBase=True)]
+        takenClassNames.extend(KEYWORDS)
+        
         ##leaf name
         if leafClassSentence.name.value in takenClassNames:
             return compilerErrors.InvalidNameError(leafClassSentence.line, scaffoldingNode, words.Chain([leafClassSentence.name.value]))
@@ -102,6 +106,7 @@ class Transformer:
         """Constructs a leaf function"""
 
         takenNames: list[str] = [structure.name for structure in scaffoldingNode.getAll(structures.LeafClass, structures.LeafFunction, recursive=True, includeBase=True)]
+        takenNames.extend(KEYWORDS)
 
         ##leaf name
         if leafFunctionSentence.name.value in takenNames:
