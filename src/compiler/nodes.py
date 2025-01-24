@@ -96,7 +96,7 @@ class LeafVariableDeclarationNode(TreeNode):
 
 
 
-class LeafClassDeclarationNode(TreeNode):
+class LeafClassDeclarationNode(ScopeNode):
 
 
     def __init__(self, line: int, parent: ScopeNode, leafClass: structures.LeafClass) -> None:
