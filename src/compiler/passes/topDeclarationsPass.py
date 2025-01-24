@@ -36,7 +36,7 @@ class TopDeclarationsPass:
                     continue
 
                 if type(child.element) == passTarget:
-                    declarationNode = self.transformer.transform(child, replace=False)
+                    declarationNode = self.transformer.transform(child, replace=True)
                     
                     if isinstance(declarationNode, compilerErrors.CompilerError):
                         return declarationNode

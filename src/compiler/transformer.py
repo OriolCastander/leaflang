@@ -24,7 +24,7 @@ class Transformer:
     def transform(self, scaffoldingNode: ScaffoldingNode, replace: bool = False) -> None | nodes.TreeNode | compilerErrors.CompilerError:
         """
         Transforms a scaffolding node into a proper node.
-        If replace is true, changes the parent (aka, slots the new node in the place of the old one). Children always changed
+        If replace is true, changes the parent (aka, slots the new node in the place of the old one). Children always changed (does this make sense now?)
         """
 
         newNode = self._constructNode(scaffoldingNode)
@@ -34,11 +34,13 @@ class Transformer:
         if replace:
             if scaffoldingNode.parent is None: newNode.parent = None
             elif isinstance(scaffoldingNode.parent, ScaffoldingNode):
-                raise Exception("scaffolding node cannot have a scaffolding node as parent")
+                raise Exception("scaffolding node cannot have a scaffolding node as parent")##error here: make leaf class scope node
             else: newNode.parent = scaffoldingNode.parent
             
         if isinstance(newNode, nodes.ScopeNode):
             newNode.children = scaffoldingNode.children
+            for child in newNode.children:
+                child.parent = newNode
 
         return newNode
 
