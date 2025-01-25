@@ -17,11 +17,11 @@ from src.base import KEYWORDS
 class Transformer:
     """Transforms a scaffolding node into a proper node"""
 
-    def __init__(self) -> None:
-        pass
+    def __init__(self, allowedSentences: list[type[sentences.Sentence]]) -> None:
+        self.allowedSentences: list[type[sentences.Sentence]] = allowedSentences
 
 
-    def transform(self, scaffoldingNode: ScaffoldingNode, replace: bool = False) -> None | nodes.TreeNode | compilerErrors.CompilerError:
+    def transform(self, scaffoldingNode: ScaffoldingNode, replace: bool = False) ->  nodes.TreeNode | compilerErrors.CompilerError:
         """
         Transforms a scaffolding node into a proper node.
         If replace is true, changes the parent (aka, slots the new node in the place of the old one). Children always changed (does this make sense now?)
@@ -56,6 +56,9 @@ class Transformer:
             scopeNode = nodes.ScopeNode(scaffoldingNode.line, scaffoldingNode.parent)
             return scopeNode
         
+        elif type(scaffoldingNode.element) not in self.allowedSentences:
+            raise Exception(f"Sentence type {type(scaffoldingNode.element)} not allowed")
+        
         elif type(scaffoldingNode.element) == sentences.LeafClassDeclaration:
             leafClass = self._constructLeafClass(scaffoldingNode.element, scaffoldingNode)
             if isinstance(leafClass, compilerErrors.CompilerError):
@@ -67,6 +70,14 @@ class Transformer:
             if isinstance(leafFunction, compilerErrors.CompilerError):
                 return leafFunction
             return nodes.LeafFunctionDeclarationNode(scaffoldingNode.line, scaffoldingNode.parent, leafFunction)
+
+
+        elif type(scaffoldingNode.element) == sentences.NakedLeafFunctionCall:
+            nakedLeafFunctionCall = self._constructNakedLeafFunctionCall(scaffoldingNode.element, scaffoldingNode)
+    
+            if isinstance(nakedLeafFunctionCall, compilerErrors.CompilerError):
+                return nakedLeafFunctionCall
+            return nakedLeafFunctionCall
 
         else:
             raise Exception(f"Unknown sentence type: {type(scaffoldingNode.element)}")
@@ -158,3 +169,140 @@ class Transformer:
         leafFunction = structures.LeafFunction(leafFunctionSentence.name.value, leafFunctionSentence.generics, parameters, ret)
         leafFunction.cName = f"{leafFunction.name}"##to work on when they are not top level
         return leafFunction
+
+
+
+
+
+
+
+
+
+    def _constructNakedLeafFunctionCall(self, nakedLeafFunctionCall: sentences.NakedLeafFunctionCall, scaffoldingNode: ScaffoldingNode) -> nodes.NakedLeafFunctionCallNode | compilerErrors.CompilerError:
+        """Constructs a naked leaf function call"""
+
+        
+        leafChain = constructLeafValue(nakedLeafFunctionCall.chain, scaffoldingNode.parent)
+        if isinstance(leafChain, compilerErrors.CompilerError):
+            return leafChain
+        
+        return nodes.NakedLeafFunctionCallNode(nakedLeafFunctionCall.line, scaffoldingNode.parent, leafChain)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def constructLeafValue(word: words.Chain | words.Operator, originNode: nodes.TreeNode | nodes.ScaffoldingNode) -> structures.LeafValue | compilerErrors.CompilerError:
+    """
+    Constructs a leaf value from a word chain or operator
+    TODO: separate if word is chain or operator?
+    """
+
+    parentNode = originNode.parent
+    if type(parentNode) != nodes.ScopeNode:
+        raise Exception("Parent is not a scope node")
+
+
+    if type(word) == words.Chain:
+
+        newElements: list[structures.LeafMention | structures.LeafFunctionCall | int | float | str | bool] = []
+        insideClass = None
+
+        for wordElement in word.elements:
+
+            if insideClass is None:
+
+                if type(wordElement) == words.Mention:
+                    mention = parentNode.getStructureByName(wordElement.value)
+
+                    ##fail if not found
+                    if mention is None:
+                        return compilerErrors.InvalidNameError(originNode.line, originNode, wordElement.value)
+                    
+                    ##fail if not variable
+                    if type(mention) != structures.LeafMention:
+                        return compilerErrors.InvalidStructureError(originNode.line, originNode, wordElement.value, structures.LeafMention, type(mention))
+                    
+                    newElements.append(mention)
+                    insideClass = mention.leafClass
+
+
+                elif type(wordElement) == words.LeafFunctionCallWord:
+
+                    leafFunctionStructure = parentNode.getStructureByName(wordElement.leafFunction.value)
+
+                    ##fail if not found
+                    if leafFunctionStructure is None:
+                        return compilerErrors.InvalidNameError(originNode.line, originNode, wordElement.leafFunction.value)
+                    
+                    ##if a class, grab the constructor yo
+                    if type(leafFunctionStructure) == structures.LeafClass:
+                        if leafFunctionStructure.constructor is None: raise Exception("Class has no constructor")
+                        leafFunctionStructure = leafFunctionStructure.constructor
+
+                    ##not a function yo
+                    if type(leafFunctionStructure) != structures.LeafFunction:
+                        return compilerErrors.InvalidStructureError(originNode.line, originNode, wordElement.leafFunction.value, structures.LeafFunction, type(functionCallStructure))
+                    
+                    ###VALID STUFFS, PROCEED W/ EVERYTHING
+
+                    ##get the generics
+                    generics: list[structures.LeafClass] = []
+                    for wordGeneric in wordElement.generics:
+                        generic = parentNode.getClass(wordGeneric, includeBase=True)
+                        if isinstance(generic, compilerErrors.CompilerError):
+                            return generic
+                        generics.append(generic)
+
+                    ###get the parameters
+                    arguments: list[structures.LeafValue] = []
+
+                    for wordArgument in wordElement.arguments:
+                        argument = constructLeafValue(wordArgument, originNode)
+                        
+                        if isinstance(argument, compilerErrors.CompilerError):
+                            return argument
+                        arguments.append(argument)
+
+                    ##construct the function call
+                    functionCallStructure = structures.LeafFunctionCall(leafFunctionStructure, generics, arguments)
+                    newElements.append(functionCallStructure)
+                    insideClass = functionCallStructure.leafFunction.ret.leafClass
+
+
+
+                elif type(wordElement) in [int, float, str, bool]:
+                    newElements.append(wordElement)
+
+                else:
+                    raise Exception(f"Unknown word element type: {type(wordElement)}")
+                
+
+
+
+
+            elif insideClass is not None:
+
+                ##TODO: implement. If mention, get the field, if function call, get the method, error if primitive...
+                raise NotImplementedError()
+
+
+        
+        return structures.LeafChain(newElements)
+
+
+
+
+
+
+    elif type(word) == words.Operator:
+        raise NotImplementedError()

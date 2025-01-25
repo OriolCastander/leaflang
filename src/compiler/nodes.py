@@ -77,6 +77,22 @@ class ScopeNode(TreeNode):
 
 
 
+    def getStructureByName(self, name: str) -> structures.LeafMention | structures.LeafClass | structures.LeafFunction | None:
+        """Gets the element in scope with the given name (or None if not found)"""
+
+        ##TODO: do it more efficient for the love of god
+        ##I'm lazy and I did it like this.
+        ##Wow, get All yields each level? (nah Im like high rn)
+
+        allStructures = self.getAll(structures.LeafMention, structures.LeafClass, structures.LeafFunction, recursive=True, includeBase=True)
+        for structure in allStructures:
+            if structure.name == name:
+                return structure
+        return None
+
+
+
+
 
 class LeafVariableDeclarationNode(TreeNode):
     """
@@ -120,6 +136,22 @@ class LeafFunctionDeclarationNode(ScopeNode):
     def getStructure(self) -> structures.LeafFunction:
         return self.function
     
+
+
+
+
+
+class NakedLeafFunctionCallNode(TreeNode):
+
+    def __init__(self, line: int, parent: ScopeNode, chain: structures.LeafChain) -> None:
+        super().__init__(line, parent)
+
+        self.chain: structures.LeafChain = chain
+
+
+    def getStructure(self) -> structures.LeafChain:
+        return self.chain
+
 
 
 

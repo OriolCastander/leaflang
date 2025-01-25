@@ -46,6 +46,8 @@ class Writer:
             return self._writeScopeNode(node, writeEntryOpenCurly=node != self.entryNode)
         
         
+        elif type(node) == nodes.NakedLeafFunctionCallNode:
+            return self._writeNakedLeafFunctionCall(node)
         
         
         else:
@@ -131,6 +133,15 @@ class Writer:
             string += "\t" * self.nIndentations + "}\n"
 
         return string
+    
+
+
+
+
+    def _writeNakedLeafFunctionCall(self, nakedLeafFunctionCallNode: nodes.NakedLeafFunctionCallNode) -> str:
+        """Writes the naked leaf function call"""
+
+        return "\t" * self.nIndentations + nakedLeafFunctionCallNode.chain.write() + ";\n"
 
 
 

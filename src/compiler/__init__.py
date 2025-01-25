@@ -5,6 +5,8 @@ import src.parser.sentences as sentences
 
 from src.compiler.passes.scaffoldingPass import ScaffoldingPass, ScaffoldingNode
 from src.compiler.passes.topDeclarationsPass import TopDeclarationsPass
+from src.compiler.passes.mainPass import MainPass
+
 from src.compiler.transformer import Transformer
 import src.compiler.compilerErrors as compilerErrors
 
@@ -28,16 +30,26 @@ class Compiler:
         scaffoldingPass: ScaffoldingPass = ScaffoldingPass()
         scaffoldingRoot: ScaffoldingNode = scaffoldingPass.run(sentences)
 
-        transformer = Transformer()
+        transformer = Transformer(allowedSentences=[])
         root = transformer.transform(scaffoldingRoot)
 
-        topDeclarationsPass = TopDeclarationsPass(transformer)
+        topDeclarationsPass = TopDeclarationsPass()
         compilerError = topDeclarationsPass.run(root)
         if isinstance(compilerError, compilerErrors.CompilerError):
             print(compilerError)
             exit(1)
 
         self._setMainFunction(root)
+
+
+
+        mainPass = MainPass()
+        compilerError = mainPass.run(root)
+        if isinstance(compilerError, compilerErrors.CompilerError):
+            print(compilerError)
+            exit(1)
+
+        
 
         return root
         
@@ -56,6 +68,7 @@ class Compiler:
         for child in [child for child in root.children if type(child) == nodes.ScaffoldingNode]:
             root.children.remove(child)
             mainLeafFunctionNode.children.append(child)
+            child.parent = mainLeafFunctionNode
 
         root.children.append(mainLeafFunctionNode)
 

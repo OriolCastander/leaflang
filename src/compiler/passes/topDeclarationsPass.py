@@ -12,9 +12,9 @@ from src.compiler.transformer import Transformer
 class TopDeclarationsPass:
     """Gets the definitions of classes and functions that must be top level"""
 
-    def __init__(self, transformer: Transformer | None = None) -> None:
+    def __init__(self) -> None:
         
-        self.transformer = Transformer() if transformer is None else transformer
+        self.transformer = Transformer(allowedSentences=[sentences.LeafClassDeclaration, sentences.LeafFunctionDeclaration])
 
 
     def run(self, treeRoot: nodes.ScopeNode) -> compilerErrors.CompilerError | list[nodes.LeafClassDeclarationNode, nodes.LeafFunctionDeclarationNode]:
