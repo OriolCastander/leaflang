@@ -49,6 +49,15 @@ class Writer:
         elif type(node) == nodes.NakedLeafFunctionCallNode:
             return self._writeNakedLeafFunctionCall(node)
         
+
+
+        elif type(node) == nodes.LeafVariableDeclarationNode:
+            return self._writeLeafVariableDeclaration(node)
+
+
+        elif type(node) == nodes.AssignmentNode:
+            return self._writeAssignment(node)
+        
         
         else:
             raise Exception(f"Canot write node of type {type(node)}")
@@ -133,6 +142,33 @@ class Writer:
             string += "\t" * self.nIndentations + "}\n"
 
         return string
+    
+
+
+
+    def _writeLeafVariableDeclaration(self, leafVariableDeclarationNode: nodes.LeafVariableDeclarationNode) -> str:
+        """Writes the leaf variable declaration"""
+
+        leafClass = leafVariableDeclarationNode.variable.leafClass
+        
+        if leafVariableDeclarationNode.variable.allocation == ALLOCATION.STACK:
+            cDeclarationString = leafClass.cName + " " + leafVariableDeclarationNode.variable.name + "__STACK;"
+            declarationString = leafClass.cName + "* " + leafVariableDeclarationNode.variable.name + " = &" + leafVariableDeclarationNode.variable.name + "__STACK" + ";"
+            return "\t" * self.nIndentations + cDeclarationString + "\n" + "\t" * self.nIndentations + declarationString + "\n"
+        
+        elif leafVariableDeclarationNode.variable.allocation == ALLOCATION.HEAP:
+            ##TODO: heap stuff
+            raise NotImplementedError("")
+
+        else:
+            raise Exception("Invalid allocation type")
+
+
+
+    def _writeAssignment(self, assignmentNode: nodes.AssignmentNode) -> str:
+        """Writes the assignment"""
+
+        return "\t" * self.nIndentations + "*" + assignmentNode.assignee.write() + " = " + assignmentNode.value.write() + ";\n"
     
 
 

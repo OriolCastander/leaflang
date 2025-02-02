@@ -57,3 +57,12 @@ class LeafClassNotFoundError(CompilerError):
 
     def __init__(self, line: int, causingNode: nodes.TreeNode | nodes.ScaffoldingNode, chain: words.Chain) -> None:
         super().__init__(line, causingNode, f"Leaf class {chain} not found")
+
+
+
+
+class InvalidStructureError(CompilerError):
+    """An error that occurs when a structure is invalid"""
+
+    def __init__(self, line: int, causingNode: nodes.TreeNode | nodes.ScaffoldingNode, chain: words.Chain, expectedType: type, actualType: type) -> None:
+        super().__init__(line, causingNode, f"Invalid structure {chain}: expected {expectedType}, got {actualType}")

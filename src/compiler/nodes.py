@@ -13,6 +13,8 @@ import src.parser.words as words
 
 from src.base import BASE_CLASSES, BASE_FUNCTIONS
 
+##TODO: maybe join scaffolding node and scope node into something like, they got the same funcs...
+
 
 class ScaffoldingNode:
 
@@ -35,6 +37,18 @@ class ScaffoldingNode:
         """Returns the class of the given name"""
         return _getClass(self, chain, includeBase)
 
+    def getStructureByName(self, name: str) -> structures.LeafMention | structures.LeafClass | structures.LeafFunction | None:
+        """Gets the element in scope with the given name (or None if not found)"""
+
+        ##TODO: do it more efficient for the love of god
+        ##I'm lazy and I did it like this.
+        ##Wow, get All yields each level? (nah Im like high rn)
+
+        allStructures = self.getAll(structures.LeafMention, structures.LeafClass, structures.LeafFunction, recursive=True, includeBase=True)
+        for structure in allStructures:
+            if structure.name == name:
+                return structure
+        return None
 
 
 class TreeNode(abc.ABC):
@@ -44,25 +58,11 @@ class TreeNode(abc.ABC):
         
         self.line: int = line
         self.parent: ScaffoldingNode | ScopeNode | None = parent
+        
 
     def getStructure(self) -> structures.LeafMention | structures.LeafFunction | structures.LeafClass | None:
         """Returns the structure of the node (overriden in certain nodes)"""
         return None
-
-
-
-
-
-class ScopeNode(TreeNode):
-    """
-    Node that opens a new scope, such as the body of a function declaration, if statement...
-    Has children
-    """
-
-    def __init__(self, line: int, parent: Union["ScopeNode", None]) -> None:
-        super().__init__(line, parent)
-
-        self.children: list[TreeNode | ScaffoldingNode] = []
 
 
     def getAll(self, *leafStructures: type, recursive: bool = False, includeBase: bool = False) -> list[structures.LeafMention | structures.LeafFunction | structures.LeafClass]:
@@ -89,6 +89,21 @@ class ScopeNode(TreeNode):
             if structure.name == name:
                 return structure
         return None
+
+
+
+
+class ScopeNode(TreeNode):
+    """
+    Node that opens a new scope, such as the body of a function declaration, if statement...
+    Has children
+    """
+
+    def __init__(self, line: int, parent: Union["ScopeNode", None]) -> None:
+        super().__init__(line, parent)
+
+        self.children: list[TreeNode | ScaffoldingNode] = []
+
 
 
 
@@ -152,6 +167,15 @@ class NakedLeafFunctionCallNode(TreeNode):
     def getStructure(self) -> structures.LeafChain:
         return self.chain
 
+
+
+class AssignmentNode(TreeNode):
+
+    def __init__(self, line: int, parent: ScopeNode, assignee: structures.LeafChain, value: structures.LeafValue) -> None:
+        super().__init__(line, parent)
+
+        self.assignee: structures.LeafChain = assignee
+        self.value: structures.LeafValue = value
 
 
 

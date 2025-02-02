@@ -35,7 +35,9 @@ class Transformer:
             if scaffoldingNode.parent is None: newNode.parent = None
             elif isinstance(scaffoldingNode.parent, ScaffoldingNode):
                 raise Exception("scaffolding node cannot have a scaffolding node as parent")##error here: make leaf class scope node
-            else: newNode.parent = scaffoldingNode.parent
+            else:
+                newNode.parent = scaffoldingNode.parent
+                #newNode.parent.children[newNode.parent.children.index(scaffoldingNode)] = newNode
             
         if isinstance(newNode, nodes.ScopeNode):
             newNode.children = scaffoldingNode.children
@@ -75,9 +77,16 @@ class Transformer:
         elif type(scaffoldingNode.element) == sentences.NakedLeafFunctionCall:
             nakedLeafFunctionCall = self._constructNakedLeafFunctionCall(scaffoldingNode.element, scaffoldingNode)
     
-            if isinstance(nakedLeafFunctionCall, compilerErrors.CompilerError):
-                return nakedLeafFunctionCall
             return nakedLeafFunctionCall
+        
+
+        elif type(scaffoldingNode.element) == sentences.LeafVariableDeclaration:
+            leafVariableDeclaration = self._constructLeafVariableDeclaration(scaffoldingNode.element, scaffoldingNode)
+            return leafVariableDeclaration
+
+        elif type(scaffoldingNode.element) == sentences.Assignment:
+            assignment = self._constructAssignment(scaffoldingNode.element, scaffoldingNode)
+            return assignment
 
         else:
             raise Exception(f"Unknown sentence type: {type(scaffoldingNode.element)}")
@@ -172,6 +181,38 @@ class Transformer:
 
 
 
+    def _constructLeafVariableDeclaration(self, leafVariableDeclarationSentence: sentences.LeafVariableDeclaration, scaffoldingNode: ScaffoldingNode) -> nodes.LeafVariableDeclarationNode | compilerErrors.CompilerError:
+        """Constructs a leaf variable declaration"""
+
+        parentNode: nodes.ScopeNode = scaffoldingNode.parent
+        if not isinstance(parentNode, nodes.ScopeNode):
+            raise Exception("Parent is not a scope node")
+        
+        leafClass = scaffoldingNode.getClass(leafVariableDeclarationSentence.declaration.leafClassDescriptor)
+        
+        if leafClass is None:
+            return compilerErrors.LeafClassNotFoundError(leafVariableDeclarationSentence.line, scaffoldingNode, leafVariableDeclarationSentence.declaration.leafClassDescriptor)
+        
+        variableName = leafVariableDeclarationSentence.declaration.mention.value
+        if variableName in KEYWORDS:
+            return compilerErrors.InvalidNameError(leafVariableDeclarationSentence.line, scaffoldingNode, variableName)
+
+        if scaffoldingNode.getStructureByName(variableName) is not None:
+            return compilerErrors.InvalidNameError(leafVariableDeclarationSentence.line, scaffoldingNode, variableName)
+
+        ##generics
+        generics: list[structures.LeafClass] = []
+        for genericWord in leafVariableDeclarationSentence.declaration.generics:
+            generic = parentNode.getClass(genericWord, includeBase=True)
+            if isinstance(generic, compilerErrors.CompilerError):
+                return generic
+            generics.append(generic)
+
+        ##TODO: ALLOCATION AND PASSING
+
+        leafMention = structures.LeafMention(variableName, leafClass, generics, allocation=leafVariableDeclarationSentence.allocation)
+        leafMention.cName = variableName
+        return nodes.LeafVariableDeclarationNode(leafVariableDeclarationSentence.line, scaffoldingNode.parent, leafMention)
 
 
 
@@ -182,7 +223,7 @@ class Transformer:
         """Constructs a naked leaf function call"""
 
         
-        leafChain = constructLeafValue(nakedLeafFunctionCall.chain, scaffoldingNode.parent)
+        leafChain = constructLeafValue(nakedLeafFunctionCall.chain, scaffoldingNode)
         if isinstance(leafChain, compilerErrors.CompilerError):
             return leafChain
         
@@ -192,7 +233,24 @@ class Transformer:
 
 
 
+    def _constructAssignment(self, assignmentSentence: sentences.Assignment, scaffoldingNode: ScaffoldingNode) -> nodes.AssignmentNode | compilerErrors.CompilerError:
+        """Constructs an assignment"""
 
+        assigneeWord = assignmentSentence.assignee
+        assignee = constructLeafValue(assigneeWord, scaffoldingNode)
+        value = constructLeafValue(assignmentSentence.value, scaffoldingNode)
+
+        if isinstance(assignee, compilerErrors.CompilerError):
+            return assignee
+        if type(assignee) != structures.LeafChain:
+            return compilerErrors.InvalidStructureError(assignmentSentence.line, scaffoldingNode, assigneeWord, structures.LeafChain, type(assignee))
+        
+        if isinstance(value, compilerErrors.CompilerError):
+            return value
+        
+        
+        return nodes.AssignmentNode(assignmentSentence.line, scaffoldingNode.parent, assignee, value)
+        
 
 
 
@@ -208,7 +266,7 @@ def constructLeafValue(word: words.Chain | words.Operator, originNode: nodes.Tre
     """
 
     parentNode = originNode.parent
-    if type(parentNode) != nodes.ScopeNode:
+    if not isinstance(parentNode, nodes.ScopeNode):
         raise Exception("Parent is not a scope node")
 
 
@@ -222,7 +280,7 @@ def constructLeafValue(word: words.Chain | words.Operator, originNode: nodes.Tre
             if insideClass is None:
 
                 if type(wordElement) == words.Mention:
-                    mention = parentNode.getStructureByName(wordElement.value)
+                    mention = originNode.getStructureByName(wordElement.value)
 
                     ##fail if not found
                     if mention is None:
@@ -238,7 +296,7 @@ def constructLeafValue(word: words.Chain | words.Operator, originNode: nodes.Tre
 
                 elif type(wordElement) == words.LeafFunctionCallWord:
 
-                    leafFunctionStructure = parentNode.getStructureByName(wordElement.leafFunction.value)
+                    leafFunctionStructure = originNode.getStructureByName(wordElement.leafFunction.value)
 
                     ##fail if not found
                     if leafFunctionStructure is None:
