@@ -28,6 +28,7 @@ class LeafVariableDeclaration(Sentence):
         super().__init__(line)
 
         self.declaration: words.Declaration = declaration
+        self.allocation: ALLOCATION = allocation
 
 
 
@@ -99,7 +100,7 @@ class Assignment(Sentence):
     def __init__(self, line: int, assignee: words.Chain, value: words.Chain | words.Operator) -> None:
         super().__init__(line)
 
-        self.assignee: words.Mention = assignee
+        self.assignee: words.Chain = assignee
         self.value: words.Chain | words.Operator = value
 
     def __repr__(self) -> str:
