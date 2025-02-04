@@ -164,6 +164,7 @@ class Transformer:
                 raise NotImplementedError()
             
             parameter = structures.LeafMention(parameterWord.mention.value, parameterLeafClass, [])
+            parameter.cName = parameter.name
             parameters.append(parameter)
 
 
@@ -210,7 +211,7 @@ class Transformer:
 
         ##TODO: ALLOCATION AND PASSING
 
-        leafMention = structures.LeafMention(variableName, leafClass, generics, allocation=leafVariableDeclarationSentence.allocation)
+        leafMention = structures.LeafMention(variableName, leafClass, generics, allocation=leafVariableDeclarationSentence.allocation, passing=PASSING.REFERENCE)
         leafMention.cName = variableName
         return nodes.LeafVariableDeclarationNode(leafVariableDeclarationSentence.line, scaffoldingNode.parent, leafMention)
 

@@ -190,6 +190,12 @@ def _getAll(node: TreeNode | ScaffoldingNode, *leafStructures: type, recursive: 
     if includeBase:
         validStructures.extend(BASE_CLASSES.getAll())
         validStructures.extend(BASE_FUNCTIONS.getAll())
+
+
+    if type(node) == LeafFunctionDeclarationNode:
+        ##include the params
+        for parameter in node.function.parameters:
+            validStructures.append(parameter)
     
     if node.parent is not None:
         for child in node.parent.children[:node.parent.children.index(node)]:

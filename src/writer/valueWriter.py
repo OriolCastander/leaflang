@@ -3,6 +3,7 @@
 import src.compiler.structures as structures
 
 
+from src.utils import ALLOCATION, PASSING
 
 
 
@@ -44,15 +45,21 @@ def writeLeafFunctionCall(leafFunctionCall: structures.LeafFunctionCall) -> str:
         ##TODO: pass the variable that is calling the method as argument in the c call
         raise NotImplementedError()
     
-    for i, argument in enumerate(leafFunctionCall.arguments):
+    for i, (argument, parameter) in enumerate(zip(leafFunctionCall.arguments, leafFunctionCall.leafFunction.parameters)):
         if i>0: string += ", "
-        
-        if type(argument) == int:
-            string += f"{argument}"
-        elif type(argument) == float:
-            raise NotImplementedError()
-        elif type(argument) == structures.LeafValue:
-            string += argument.write()
+       
+        argumentString = argument.write()
+
+        ##TODO: PUT THIS SOMEWHERE ELSE BECAUSE WE'LL NEED TO REUSE IT
+        if type(argument) == structures.LeafChain:
+            if len(argument.elements) == 1 and type(argument.elements[0]) in [int, float]:
+                string += f"{argumentString}"
+                continue
+
+        if parameter.passing == PASSING.REFERENCE:
+            string += argumentString
+        elif parameter.passing == PASSING.VALUE:
+            string += "*" + argumentString
 
     string += ")"
     return string

@@ -80,6 +80,16 @@ class LeafValue(abc.ABC):
         pass
 
 
+    @abc.abstractmethod
+    def getFinalAllocation(self) -> ALLOCATION:
+        pass
+
+    @abc.abstractmethod
+    def getFinalPassing(self) -> PASSING:
+        pass
+
+
+
 
 
 
@@ -121,9 +131,41 @@ class LeafChain(LeafValue):
             raise NotImplementedError(f"Invalid type {type(self.elements[-1])}")
         
 
+    def getFinalAllocation(self) -> ALLOCATION:
+        """Returns the allocation of the final element of the chain"""
+
+        if type(self.elements[-1]) == LeafFunctionCall:
+            return self.elements[-1].leafFunction.ret.allocation
+        
+        elif type(self.elements[-1]) == LeafMention:
+            return self.elements[-1].allocation
+        
+        elif type(self.elements[-1]) == int:
+            return ALLOCATION.STACK
+        
+        else:
+            raise NotImplementedError(f"Invalid type {type(self.elements[-1])}")
+        
+
+    def getFinalPassing(self) -> PASSING:
+        """Returns the passing of the final element of the chain"""
+
+        if type(self.elements[-1]) == LeafFunctionCall:
+            return self.elements[-1].leafFunction.ret.passing
+        
+        elif type(self.elements[-1]) == LeafMention:
+            return self.elements[-1].passing
+        
+        elif type(self.elements[-1]) == int:
+            return PASSING.VALUE
+        
+        else:
+            raise NotImplementedError(f"Invalid type {type(self.elements[-1])}")
+        
 
 
-class LeafFunctionCall(LeafValue):
+
+class LeafFunctionCall:
     """
     A function call
     """
@@ -134,13 +176,3 @@ class LeafFunctionCall(LeafValue):
         self.generics: list[LeafChain] = generics
         self.arguments: list[LeafValue] = arguments
 
-
-    def write(self) -> str:
-        """Returns the C code for the function call"""
-
-        raise NotImplementedError("LeafFunctionCall.write() not implemented")
-    
-
-    def getFinalLeafClass(self) -> LeafClass:
-        """Returns the leaf class of the function call"""
-        return self.leafFunction.ret.leafClass
