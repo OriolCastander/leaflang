@@ -1,8 +1,11 @@
 
 from enum import IntEnum
+import src.compiler.structures as structures
 import src.compiler.nodes as nodes
 
 import src.parser.words as words
+
+from src.utils import OperatorKind
 
 class CompilerError:
 
@@ -66,3 +69,19 @@ class InvalidStructureError(CompilerError):
 
     def __init__(self, line: int, causingNode: nodes.TreeNode | nodes.ScaffoldingNode, chain: words.Chain, expectedType: type, actualType: type) -> None:
         super().__init__(line, causingNode, f"Invalid structure {chain}: expected {expectedType}, got {actualType}")
+
+
+
+class LeafClassMismatchError(CompilerError):
+    """Error when classes that are expected equal are not"""
+
+    def __init__(self, line: int, causingNode: nodes.TreeNode, expectedLeafClass: structures.LeafClass, actualLeafClass: structures.LeafClass) -> None:
+        super().__init__(line, causingNode, f"Invalid class: expected {expectedLeafClass.name}, got {actualLeafClass.name}")
+
+
+
+class InvalidOperatorError(CompilerError):
+    """Error when an operator is invalid"""
+
+    def __init__(self, line: int, causingNode: nodes.TreeNode, leafClass: structures.LeafClass, operatorKind: OperatorKind) -> None:
+        super().__init__(line, causingNode, f"Invalid operator {operatorKind} for class {leafClass.name}")

@@ -4,6 +4,10 @@ Words are part of sentences, can be simple mentions like a className or Variable
 
 from typing import Union
 
+from src.tokenizer.token import Token, TokenKind
+
+from src.utils import OperatorKind
+
 
 class Mention: #?? (str):
     """
@@ -35,8 +39,27 @@ class Chain:
 
 class Operator:
 
-    def __init__(self):
-        raise NotImplementedError()
+
+
+    @staticmethod
+    def tokenToOperatorKind(token: Token) -> OperatorKind:
+        if token.kind == TokenKind.PLUS:
+            return OperatorKind.SUM
+        else:
+            raise Exception(f"Invalid operator token {token}")
+
+    
+    
+    def __init__(self, operatorKind: OperatorKind, left: Union[Chain, "Operator"], right: Union[Chain, "Operator"]):
+        
+        self.operatorKind: OperatorKind = operatorKind
+        self.left: Chain | Operator = left
+        self.right: Chain | Operator = right
+
+    def __repr__(self) -> str:
+        return f"Operator: ({self.left}) {self.operatorKind} ({self.right})"
+
+
 
 
 

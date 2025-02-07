@@ -3,7 +3,7 @@
 
 import src.compiler.structures as structures
 
-from src.utils import ALLOCATION, PASSING
+from src.utils import ALLOCATION, PASSING, OperatorKind
 
 """
 Prebuilt classes and functions for the language
@@ -33,6 +33,27 @@ class BaseClasses:
         intConstructor = structures.LeafFunction("int", [], None, structures.LeafMention(None, intClass, [])) ##TODO: PARAMETERS IS NONE, CAN WE GET AWAY WITH IT?
         intConstructor.customSignature = lambda x: f"{x}"
         intClass.constructor = intConstructor
+
+        sumOperator = structures.LeafFunction("int__operator__SUM", [], None, structures.LeafMention(None, intClass, []))
+        def sumOperatorcustomSignature(argument1: structures.LeafValue, argument2: structures.LeafValue) -> str:
+
+            string = ""
+
+            for argument in [argument1, argument2]:
+
+                if argument.getFinalPassing() == PASSING.VALUE:
+                    string += argument.write()
+                elif argument.getFinalPassing() == PASSING.REFERENCE:
+                    string += "*" + argument.write()
+
+                if argument == argument1:
+                    string += " + "
+
+            return string
+        
+        sumOperator.customSignature = sumOperatorcustomSignature
+        sumOperator.cName = sumOperator.name
+        intClass.operators[OperatorKind.SUM] = sumOperator
         return intClass
 
 

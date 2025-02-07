@@ -73,7 +73,7 @@ def run(programPath: str, outputPath: str, deleteCFile: bool = False) -> None:
 
 def main():
 
-    ast = compile("examples/test.lf", printTokens=False, printSentences=True)
+    ast = compile("examples/test.lf", printTokens=True, printSentences=True)
     write(ast, "examples/test.c", printCProgram=True)
 
     run("examples/test.c", "examples/test", deleteCFile=False)

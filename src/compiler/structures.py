@@ -5,7 +5,7 @@ from typing import Callable, Any, Union
 import abc
 
 
-from src.utils import ALLOCATION, PASSING
+from src.utils import ALLOCATION, PASSING, OperatorKind
 
 
 
@@ -26,6 +26,13 @@ class LeafClass:
 
         self.properties: dict[str, LeafMention] = {}
         self.methods: dict[str, LeafFunction] = {}
+
+        self.operators: dict[OperatorKind, LeafFunction] = {}
+
+
+
+    def getOperator(self, operatorKind: OperatorKind) -> Union["LeafFunction", None]:
+        return self.operators.get(operatorKind, None)
 
 
 
@@ -163,6 +170,36 @@ class LeafChain(LeafValue):
             raise NotImplementedError(f"Invalid type {type(self.elements[-1])}")
         
 
+
+class LeafOperator(LeafValue):
+    """A leaf operator"""
+
+    def __init__(self, operatorKind: OperatorKind, leafFunction: LeafFunction, left: LeafValue, right: LeafValue) -> None:
+        self.operatorKind: OperatorKind = operatorKind
+        self.leafFunction: LeafFunction = leafFunction
+        self.left: LeafValue = left
+        self.right: LeafValue = right
+
+        self.leafFunctionCall: LeafFunctionCall = LeafFunctionCall(self.leafFunction, [], [self.left, self.right])
+
+
+    def write(self) -> str:
+        """Returns the C code for the operator"""
+        return LeafChain([self.leafFunctionCall]).write()
+    
+    
+
+    def getFinalLeafClass(self) -> LeafClass:
+        return self.leafFunctionCall.leafFunction.ret.leafClass
+    
+
+    def getFinalAllocation(self) -> ALLOCATION:
+        return self.leafFunctionCall.leafFunction.ret.allocation
+    
+
+    def getFinalPassing(self) -> PASSING:
+        return self.leafFunctionCall.leafFunction.ret.passing
+    
 
 
 class LeafFunctionCall:

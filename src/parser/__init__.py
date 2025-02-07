@@ -312,7 +312,7 @@ class Parser:
         """
 
         CLOSURE_TOKEN_KINDS = [TokenKind.SEMICOLON, TokenKind.COMMA, TokenKind.COLON, TokenKind.CLOSE_PAR, TokenKind.EQUALS, TokenKind.CLOSE_ANG, TokenKind.OPEN_ANG, TokenKind.OPEN_CUR]
-
+        OPERATOR_TOKEN_KINDS = [TokenKind.PLUS]
 
         elements: list[words.Mention | words.LeafFunctionCallWord | str | int | float | bool] = []
         
@@ -335,7 +335,18 @@ class Parser:
                 
                 self.index += 1
                 nextToken = self.tokens[self.index]
+                
                 if nextToken.kind not in CLOSURE_TOKEN_KINDS: ##TODO: should 4.toFloat() be allowed?
+                    if allowOperators and nextToken.kind in OPERATOR_TOKEN_KINDS:
+                        operatorKind = words.Operator.tokenToOperatorKind(nextToken)
+                        self.index += 1
+                        elements.append(value)
+
+                        leftValue = words.Chain(elements)
+                        rightValue = self._consumeValue(allowOperators=allowOperators, allowBaseValues=allowBaseValues, allowFunctionCalls=allowFunctionCalls)
+                        operator = words.Operator(operatorKind, leftValue, rightValue)
+                        return operator
+
                     print(f"PARSING ERROR (line {nextToken.line}): After number, a closure token is expected.")
                     exit(1)
                 
@@ -383,13 +394,25 @@ class Parser:
                 self.index += 1
                 continue
 
-            ##todo: elif nextToken is operator, do operator
-            
+            elif allowOperators and token.kind in OPERATOR_TOKEN_KINDS:
+                operatorKind = words.Operator.tokenToOperatorKind(token)
+                self.index += 1
+
+                if len(elements) == 0:
+                    print(f"PARSING ERROR (line {token.line}): Expected a value before the operator.")
+                    exit(1)
+
+                leftValue = words.Chain(elements)
+                rightValue = self._consumeValue(allowOperators=allowOperators, allowBaseValues=allowBaseValues, allowFunctionCalls=allowFunctionCalls)
+                operator = words.Operator(operatorKind, leftValue, rightValue)
+                return operator
+                
+
             elif token.kind in CLOSURE_TOKEN_KINDS:
                 return words.Chain(elements)
                 
             else:
-                print(f"PARSING ERROR (line {nextToken.line}): Invalid token {token}.")
+                print(f"PARSING ERROR (line {token.line}): Invalid token {token}.")
                 exit(1)
 
             

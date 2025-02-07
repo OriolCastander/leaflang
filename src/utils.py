@@ -1,6 +1,6 @@
 
 
-from enum import IntEnum
+from enum import IntEnum, StrEnum
 
 
 class ALLOCATION(IntEnum):
@@ -12,3 +12,7 @@ class ALLOCATION(IntEnum):
 class PASSING(IntEnum):
     REFERENCE = 0
     VALUE = 1
+
+
+class OperatorKind(StrEnum):
+    SUM = "+"

@@ -364,4 +364,28 @@ def constructLeafValue(word: words.Chain | words.Operator, originNode: nodes.Tre
 
 
     elif type(word) == words.Operator:
-        raise NotImplementedError()
+
+        leftValue = constructLeafValue(word.left, originNode)
+
+        if isinstance(leftValue, compilerErrors.CompilerError):
+            return leftValue
+        
+        leftValueClass = leftValue.getFinalLeafClass()
+
+        rightValue = constructLeafValue(word.right, originNode)
+        if isinstance(rightValue, compilerErrors.CompilerError):
+            return rightValue
+        
+        rightValueClass = rightValue.getFinalLeafClass()
+        
+        operatorFunction = leftValueClass.getOperator(word.operatorKind)
+
+        if operatorFunction is None:
+            return compilerErrors.InvalidOperatorError(originNode.line, originNode, leftValueClass, word.operatorKind)
+
+        if leftValueClass != operatorFunction.ret.leafClass:
+            return compilerErrors.LeafClassMismatchError(originNode.line, originNode, operatorFunction.ret.leafClass, rightValueClass)
+
+
+        
+        return structures.LeafOperator(word.operatorKind, operatorFunction, leftValue, rightValue)
