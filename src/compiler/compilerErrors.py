@@ -4,6 +4,7 @@ import src.compiler.structures as structures
 import src.compiler.nodes as nodes
 
 import src.parser.words as words
+import src.parser.sentences as sentences
 
 from src.utils import OperatorKind
 
@@ -85,3 +86,11 @@ class InvalidOperatorError(CompilerError):
 
     def __init__(self, line: int, causingNode: nodes.TreeNode, leafClass: structures.LeafClass, operatorKind: OperatorKind) -> None:
         super().__init__(line, causingNode, f"Invalid operator {operatorKind} for class {leafClass.name}")
+
+
+
+class InvalidSentenceError(CompilerError):
+    """Error when a structure is invalid"""
+
+    def __init__(self, line: int, causingNode: nodes.TreeNode, sentence: sentences.Sentence) -> None:
+        super().__init__(line, causingNode, f"Invalid sentence {sentence}")

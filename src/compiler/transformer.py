@@ -351,8 +351,18 @@ def constructLeafValue(word: words.Chain | words.Operator, originNode: nodes.Tre
 
             elif insideClass is not None:
 
-                ##TODO: implement. If mention, get the field, if function call, get the method, error if primitive...
-                raise NotImplementedError()
+                if type(wordElement) == words.Mention:
+                    mention = insideClass.properties.get(wordElement.value)
+                    
+                    if mention is None:
+                        return compilerErrors.InvalidNameError(originNode.line, originNode, wordElement.value)
+                    newElements.append(mention)
+
+                elif type(wordElement) == words.LeafFunctionCallWord:
+                    raise NotImplementedError()
+                
+                else:##TODO: compiler error here 99% sure
+                    raise Exception(f"Unknown word element type: {type(wordElement)}")
 
 
         

@@ -6,6 +6,7 @@ import src.parser.sentences as sentences
 from src.compiler.passes.scaffoldingPass import ScaffoldingPass, ScaffoldingNode
 from src.compiler.passes.topDeclarationsPass import TopDeclarationsPass
 from src.compiler.passes.mainPass import MainPass
+from src.compiler.passes.classPass import ClassPass
 
 from src.compiler.transformer import Transformer
 import src.compiler.compilerErrors as compilerErrors
@@ -41,7 +42,11 @@ class Compiler:
 
         self._setMainFunction(root)
 
-
+        classPass = ClassPass()
+        compilerError = classPass.run(root)
+        if isinstance(compilerError, compilerErrors.CompilerError):
+            print(compilerError)
+            exit(1)
 
         mainPass = MainPass()
         compilerError = mainPass.run(root)

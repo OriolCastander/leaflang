@@ -15,20 +15,43 @@ def writeLeafChain(leafChain: structures.LeafChain) -> str:
     """Outputs the c string representation of a leaf chain"""
 
     if len(leafChain.elements) == 0: raise Exception("Must have at least one element in a chain")
-    if len(leafChain.elements) > 1: raise NotImplementedError()
+    
+    string = ""
+    currentPassing: PASSING = PASSING.VALUE
 
-    if type(leafChain.elements[0]) == structures.LeafMention:
-        return leafChain.elements[0].cName
+    for i, element in enumerate(leafChain.elements):
+
+        if type(element) == structures.LeafMention:
+            if currentPassing == PASSING.VALUE:
+               string += f"{element.cName}"
+            elif currentPassing == PASSING.REFERENCE:
+               string += f"->{element.cName}"
+
+            currentPassing = element.passing
+            
+        
+        
+        elif type(element) == structures.LeafFunctionCall:
+            ##TODO: if method, pass the self (current string) as argument
+            #probably writeMethodCall?
+            functionCallString = writeLeafFunctionCall(element)
+            if currentPassing == PASSING.VALUE:
+                string += f"{functionCallString}"
+            elif currentPassing == PASSING.REFERENCE:
+                string += f"->{functionCallString}"
+
+            currentPassing = element.leafFunction.ret.passing
+        
+        elif type(element) == int:
+            ##CURRENTLY CHAINS CAN ONLY CONTAIN 1 PRIMITIVE
+            return f"{element}"
+        
     
     
-    elif type(leafChain.elements[0]) == structures.LeafFunctionCall:
-        return writeLeafFunctionCall(leafChain.elements[0])
-    
-    elif type(leafChain.elements[0]) == int:
-        return f"{leafChain.elements[0]}"
-    
-    else:
-        raise NotImplementedError(f"Invalid type  to write {type(leafChain.elements[0])}")
+        else:
+            raise NotImplementedError(f"Invalid type  to write {type(element)}")
+        
+    return string
     
 
 
