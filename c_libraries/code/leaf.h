@@ -158,4 +158,11 @@ void __LEAF_initHeapVariable(struct __STD_List* SCOPES, struct __STD_List* HEAP_
  */
 void __LEAF_closeScope(struct __STD_List* SCOPES, struct __STD_List* HEAP_ALLOCATIONS);
 
+
+
+/**
+ * Void destructor that does nothing. Can be passed to stuff that needs a destructor but nothing needs to be done
+ */
+void __LEAF_voidDestructor(void* self);
+
 #endif //LEAF_H

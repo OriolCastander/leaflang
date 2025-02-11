@@ -2,7 +2,7 @@
 import abc
 import src.parser.words as words
 
-from src.utils import ALLOCATION
+from src.utils import ALLOCATION, PASSING
 
 class Sentence(abc.ABC):
     
@@ -29,7 +29,7 @@ class LeafVariableDeclaration(Sentence):
 
         self.declaration: words.Declaration = declaration
         self.allocation: ALLOCATION = allocation
-
+        ##self.passing: PASSING = passing IN the future, currently decided by the class
 
 
     def __repr__(self) -> str:
@@ -106,6 +106,20 @@ class Assignment(Sentence):
     def __repr__(self) -> str:
         return f"Assignment: {self.assignee} = {self.value}"
 
+
+
+
+class ReturnSentence(Sentence):
+    """
+    A return statement
+    """
+    def __init__(self, line: int, value: words.Chain | words.Operator) -> None:
+        super().__init__(line)
+
+        self.value: words.Chain | words.Operator = value
+
+    def __repr__(self) -> str:
+        return f"ReturnSentence: {self.value}"
 
 
 

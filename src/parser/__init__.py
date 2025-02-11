@@ -58,6 +58,10 @@ class Parser:
 
         elif token.kind == TokenKind.STRING and token.value == "def":
             return self._parseLeafFunctionDeclaration()
+        
+
+        elif token.kind == TokenKind.STRING and token.value == "return":
+            return self._parseReturnSentence()
 
         
         elif token.kind == TokenKind.CLOSE_CUR:
@@ -272,6 +276,19 @@ class Parser:
 
 
 
+    def _parseReturnSentence(self) -> sentences.ReturnSentence:
+        """Parses a return statement"""
+
+        self.index += 1
+        value = self._consumeValue(allowOperators=True, allowBaseValues=True, allowFunctionCalls=True)
+
+        token = self.tokens[self.index]
+        if token.kind != TokenKind.SEMICOLON:
+            print(f"PARSING ERROR (line {token.line}): Expected a semicolon after the return statement.")
+            exit(1)
+        self.index += 1
+
+        return sentences.ReturnSentence(token.line, value)
 
     def _consumeEnumerable(self, closingTokenKind: TokenKind, allowOperators: bool = True, allowBaseValues: bool = True, allowFunctionCalls: bool = True) -> list[words.Chain | words.Operator]:
         """

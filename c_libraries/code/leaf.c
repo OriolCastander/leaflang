@@ -190,3 +190,9 @@ void __LEAF_closeScope(struct __STD_List* SCOPES, struct __STD_List* HEAP_ALLOCA
 
 
 }
+
+
+
+void __LEAF_voidDestructor(void* self){
+    //DO NOTHING
+}

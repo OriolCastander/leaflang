@@ -44,7 +44,7 @@ class ScaffoldingPass:
             self._parseNewScopeDeclaration(sentence)
 
 
-        elif type(sentence) in [sentences.LeafVariableDeclaration, sentences.NakedLeafFunctionCall, sentences.Assignment]:
+        elif type(sentence) in [sentences.LeafVariableDeclaration, sentences.NakedLeafFunctionCall, sentences.Assignment, sentences.ReturnSentence]:
             self._parseStandard(sentence)
         
         elif type(sentence) == sentences.ScopeClosure:

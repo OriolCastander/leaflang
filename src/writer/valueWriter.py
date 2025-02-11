@@ -11,7 +11,7 @@ from src.utils import ALLOCATION, PASSING
 
 
 
-def writeLeafChain(leafChain: structures.LeafChain) -> str:
+def writeLeafChain(leafChain: structures.LeafChain, selfString: str | None = None) -> str:
     """Outputs the c string representation of a leaf chain"""
 
     if len(leafChain.elements) == 0: raise Exception("Must have at least one element in a chain")
@@ -23,7 +23,7 @@ def writeLeafChain(leafChain: structures.LeafChain) -> str:
 
         if type(element) == structures.LeafMention:
             if currentPassing == PASSING.VALUE:
-               string += f"{element.cName}"
+               string += f"{element.cName}" if element.allocation == ALLOCATION.HEAP else f"{element.cName}"##PROBABLY NOT A MAINTAINABLE FIX
             elif currentPassing == PASSING.REFERENCE:
                string += f"->{element.cName}"
 
@@ -34,7 +34,7 @@ def writeLeafChain(leafChain: structures.LeafChain) -> str:
         elif type(element) == structures.LeafFunctionCall:
             ##TODO: if method, pass the self (current string) as argument
             #probably writeMethodCall?
-            functionCallString = writeLeafFunctionCall(element)
+            functionCallString = writeLeafFunctionCall(element, selfString)
             if currentPassing == PASSING.VALUE:
                 string += f"{functionCallString}"
             elif currentPassing == PASSING.REFERENCE:
@@ -50,26 +50,33 @@ def writeLeafChain(leafChain: structures.LeafChain) -> str:
     
         else:
             raise NotImplementedError(f"Invalid type  to write {type(element)}")
-        
+    
     return string
     
 
 
 
-def writeLeafFunctionCall(leafFunctionCall: structures.LeafFunctionCall) -> str:
+def writeLeafFunctionCall(leafFunctionCall: structures.LeafFunctionCall, selfString: str | None = None) -> str:
     """Outputs the c string representation of a leaf function call"""
 
     if leafFunctionCall.leafFunction.customSignature is not None:
         return leafFunctionCall.leafFunction.customSignature(*leafFunctionCall.arguments)
 
-    string = f"{leafFunctionCall.leafFunction.cName}("
+    string = f"{leafFunctionCall.leafFunction.cName}(__LEAF_SCOPES, __LEAF_HEAP_ALLOCATIONS"
 
-    if leafFunctionCall.leafFunction.methodOf is not None:
+    
+
+    if leafFunctionCall.leafFunction.constructorOf is not None:
+        if selfString is None: raise Exception("Self string is required for constructor calls")
+        string += ", " + selfString
+        if len(leafFunctionCall.arguments) > 0: string += ", "
+
+
+    elif leafFunctionCall.leafFunction.methodOf is not None:
         ##TODO: pass the variable that is calling the method as argument in the c call
         raise NotImplementedError()
     
-    for i, (argument, parameter) in enumerate(zip(leafFunctionCall.arguments, leafFunctionCall.leafFunction.parameters)):
-        if i>0: string += ", "
+    for argument, parameter in zip(leafFunctionCall.arguments, leafFunctionCall.leafFunction.parameters):
        
         argumentString = argument.write()
 

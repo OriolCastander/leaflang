@@ -87,6 +87,10 @@ class Transformer:
         elif type(scaffoldingNode.element) == sentences.Assignment:
             assignment = self._constructAssignment(scaffoldingNode.element, scaffoldingNode)
             return assignment
+        
+        elif type(scaffoldingNode.element) == sentences.ReturnSentence:
+            returnStructure = self._constructReturnStructure(scaffoldingNode.element, scaffoldingNode)
+            return returnStructure
 
         else:
             raise Exception(f"Unknown sentence type: {type(scaffoldingNode.element)}")
@@ -209,9 +213,14 @@ class Transformer:
                 return generic
             generics.append(generic)
 
-        ##TODO: ALLOCATION AND PASSING
-
-        leafMention = structures.LeafMention(variableName, leafClass, generics, allocation=leafVariableDeclarationSentence.allocation, passing=PASSING.REFERENCE)
+        
+        
+        ##TALLOCATION AND PASSING
+        allocation = leafVariableDeclarationSentence.allocation
+        passing = leafClass.passing ##in the future, this may be decided elsewhere and be part of the sentence
+        if allocation == ALLOCATION.HEAP: passing = PASSING.REFERENCE
+        
+        leafMention = structures.LeafMention(variableName, leafClass, generics, allocation=allocation, passing=passing)
         leafMention.cName = variableName
         return nodes.LeafVariableDeclarationNode(leafVariableDeclarationSentence.line, scaffoldingNode.parent, leafMention)
 
@@ -255,7 +264,13 @@ class Transformer:
 
 
 
+    def _constructReturnStructure(self, returnSentence: sentences.ReturnSentence, scaffoldingNode: ScaffoldingNode) -> nodes.ReturnNode | compilerErrors.CompilerError:
+        """Constructs a return structure"""
 
+        value = constructLeafValue(returnSentence.value, scaffoldingNode)
+        if isinstance(value, compilerErrors.CompilerError):
+            return value
+        return nodes.ReturnNode(returnSentence.line, scaffoldingNode.parent, value)
 
 
 

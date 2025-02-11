@@ -58,6 +58,9 @@ class Writer:
         elif type(node) == nodes.AssignmentNode:
             return self._writeAssignment(node)
         
+        elif type(node) == nodes.ReturnNode:
+            return self._writeReturnNode(node)
+        
         
         else:
             raise Exception(f"Canot write node of type {type(node)}")
@@ -78,6 +81,12 @@ class Writer:
 
         string += f" {leafFunction.cName}("
 
+        if not leafFunction.isMain:
+            string += "struct __STD_List* __LEAF_SCOPES, struct __STD_List* __LEAF_HEAP_ALLOCATIONS\n"
+            if len(leafFunction.parameters) > 0:
+                string += ", "
+
+        
         for i, parameter in enumerate(leafFunction.parameters):
 
             if i>0:
@@ -89,7 +98,13 @@ class Writer:
             
             string += f" {parameter.name}"
 
-        string += "){\n"
+        string += "\t" * self.nIndentations + "){\n"
+
+        if leafFunction.isMain:
+            string += self._writeMainFunctionAddons()
+        
+        string += "\t" * (self.nIndentations + 1) + "__LEAF_openScope(__LEAF_SCOPES);\n"
+
         string += self._writeScopeNode(leafFunctionDeclarationNode, writeEntryOpenCurly=False)
 
         return string
@@ -118,6 +133,7 @@ class Writer:
         self.nIndentations -= 1
 
         ##TODO: write constructor + methods
+        string += self._writeFunctionDeclaration(leafClassDeclarationNode.constructor)
         
         return string
     
@@ -152,14 +168,19 @@ class Writer:
         leafClass = leafVariableDeclarationNode.variable.leafClass
         
         if leafVariableDeclarationNode.variable.allocation == ALLOCATION.STACK:
-            cDeclarationString = leafClass.cName + " " + leafVariableDeclarationNode.variable.name + "__STACK;"
-            declarationString = leafClass.cName + "* " + leafVariableDeclarationNode.variable.name + " = &" + leafVariableDeclarationNode.variable.name + "__STACK" + ";"
-            return "\t" * self.nIndentations + cDeclarationString + "\n" + "\t" * self.nIndentations + declarationString + "\n"
+            cDeclarationString = leafClass.cName + " " + leafVariableDeclarationNode.variable.name + ";"
+            return "\t" * self.nIndentations + cDeclarationString + "\n"
         
         elif leafVariableDeclarationNode.variable.allocation == ALLOCATION.HEAP:
-            ##TODO: heap stuff
-            raise NotImplementedError("")
+            declarationString = leafClass.cName + "* " + leafVariableDeclarationNode.variable.name + " = malloc(sizeof(" + leafClass.cName + "));"
+            
+            initSource: int = 0
+            initObject: str = leafVariableDeclarationNode.variable.name
+            initSize: int = f"sizeof({leafClass.cName})"
+            initDestructor = f"__LEAF_voidDestructor" ##TEMP
 
+            initVariableString = f"__LEAF_initHeapVariable(__LEAF_SCOPES, __LEAF_HEAP_ALLOCATIONS, {initSource}, {initObject}, {initSize}, &{initDestructor});"
+            return "\t" * self.nIndentations + declarationString + "\n" + "\t" * self.nIndentations + initVariableString + "\n"
         else:
             raise Exception("Invalid allocation type")
 
@@ -168,7 +189,20 @@ class Writer:
     def _writeAssignment(self, assignmentNode: nodes.AssignmentNode) -> str:
         """Writes the assignment"""
 
-        return "\t" * self.nIndentations + "*" + assignmentNode.assignee.write() + " = " + assignmentNode.value.write() + ";\n"
+        string = "\t" * self.nIndentations
+        if assignmentNode.assignee.getFinalPassing() == PASSING.REFERENCE:
+            string += "*"
+
+        assigneeString = assignmentNode.assignee.write()
+        assignedString = assignmentNode.value.write(assigneeString)
+        assignedFinalPassing = assignmentNode.value.getFinalPassing()
+        if assignedFinalPassing == PASSING.REFERENCE:
+            assignedString = f"*({assignedString})"
+
+        string += assigneeString + " = " + assignedString + ";\n"
+        ##need to do something with the assignment value and reference passing? probably bro
+
+        return string
     
 
 
@@ -180,6 +214,12 @@ class Writer:
         return "\t" * self.nIndentations + nakedLeafFunctionCallNode.chain.write() + ";\n"
 
 
+    def _writeReturnNode(self, returnNode: nodes.ReturnNode) -> str:
+        """Writes the return node"""
+
+        string = "\t" * self.nIndentations + "__LEAF_closeScope(__LEAF_SCOPES, __LEAF_HEAP_ALLOCATIONS);\n"
+
+        return string + "\t" * self.nIndentations + "return " + returnNode.value.write() + ";\n"
 
     def _getStringDefaultStart(self) -> str:
         
@@ -194,4 +234,20 @@ class Writer:
 #include "./../c_libraries/code/leaf.h"
 
 """
+        return string
+    
+
+
+    def _writeMainFunctionAddons(self) -> str:
+        """Stuff that should be appended at the beggining of the main function"""
+        
+        string = "\t//Stuff to carry through the program\n\n"
+        string += "\tstruct __STD_List* __LEAF_SCOPES = malloc(sizeof(struct __STD_List));\n"
+        string += "\tstruct __STD_List* __LEAF_HEAP_ALLOCATIONS = malloc(sizeof(struct __STD_List));\n\n"
+
+        string += "\t__STD_List_constructor(__LEAF_SCOPES, (void(*)(void*))&__LEAF_Scope_destructor);\n"
+        string += "\t__STD_List_constructor(__LEAF_HEAP_ALLOCATIONS, (void(*)(void*))&__LEAF_HeapAllocation_destructor);\n\n"
+
+        
+
         return string

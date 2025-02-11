@@ -12,7 +12,7 @@ class MainPass:
 
     def __init__(self) -> None:
         
-        self.transformer = Transformer(allowedSentences=[sentences.NakedLeafFunctionCall, sentences.Assignment, sentences.LeafVariableDeclaration])
+        self.transformer = Transformer(allowedSentences=[sentences.NakedLeafFunctionCall, sentences.Assignment, sentences.LeafVariableDeclaration, sentences.ReturnSentence])
         self.currentNode: nodes.ScopeNode
 
 

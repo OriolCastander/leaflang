@@ -134,6 +134,7 @@ class LeafClassDeclarationNode(ScopeNode):
         super().__init__(line, parent)
 
         self.leafClass: structures.LeafClass = leafClass
+        self.constructor: LeafFunctionDeclarationNode | None = None
 
     def getStructure(self) -> structures.LeafClass:
         return self.leafClass
@@ -175,6 +176,15 @@ class AssignmentNode(TreeNode):
         super().__init__(line, parent)
 
         self.assignee: structures.LeafChain = assignee
+        self.value: structures.LeafValue = value
+
+
+
+class ReturnNode(TreeNode):
+
+    def __init__(self, line: int, parent: ScopeNode, value: structures.LeafValue) -> None:
+        super().__init__(line, parent)
+
         self.value: structures.LeafValue = value
 
 

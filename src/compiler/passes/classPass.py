@@ -10,7 +10,8 @@ import src.compiler.compilerErrors as compilerErrors
 
 from src.compiler.passes.mainPass import MainPass
 
-from src.utils import PASSING
+from src.utils import ALLOCATION, PASSING
+
 
 
 
@@ -74,9 +75,47 @@ class ClassPass:
                     return compilerErrors.InvalidSentenceError(child.line, child, child.element)
                 
 
+        constructorNode = self._constructConstructor(leafClass, node)
+        node.constructor = constructorNode
+        leafClass.constructor = constructorNode.function
+
+
+
+
+
+    def _constructConstructor(self, leafClass: structures.LeafClass, leafClassDeclarationNode: nodes.LeafClassDeclarationNode) -> nodes.LeafFunctionDeclarationNode:
+        """Constructs the constructor"""
+
         ###constructor
-        constructor = structures.LeafFunction(f"{leafClass.name}__constructor", leafClass.generics, list(leafClass.properties.values()), structures.LeafMention(None, leafClass, []))
-        leafClass.constructor = constructor
+        selfMention = structures.LeafMention("self", leafClass, [], allocation=None, passing=PASSING.REFERENCE)
+        selfMention.cName = "self"
+
+        constructorParams = [selfMention] + list(leafClass.properties.values())
+        constructor = structures.LeafFunction(f"{leafClass.name}__constructor", leafClass.generics, constructorParams, structures.LeafMention(None, leafClass, [], allocation=ALLOCATION.HEAP, passing=PASSING.REFERENCE))
+        constructor.cName = f"{leafClass.name}__constructor"
+        constructor.constructorOf = leafClass
+        constructorNode = nodes.LeafFunctionDeclarationNode(leafClassDeclarationNode.line, leafClassDeclarationNode, constructor)
+
+
+
+
+        for property in leafClass.properties.values():
+            assignee = structures.LeafChain([selfMention, property])
+            value = structures.LeafChain([property])
+            assignmentNode = nodes.AssignmentNode(leafClassDeclarationNode.line, constructorNode, assignee, value)
+            constructorNode.children.append(assignmentNode)
+
+        ###RETURN NODE
+        returnStructure = structures.LeafChain([selfMention])
+        returnNode = nodes.ReturnNode(leafClassDeclarationNode.line, constructorNode, returnStructure)
+        constructorNode.children.append(returnNode)
+
+        
+
+        return constructorNode
+
+
+
 
 
 

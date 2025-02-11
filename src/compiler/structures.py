@@ -65,9 +65,12 @@ class LeafFunction:
         self.ret: LeafMention = ret
 
         self.methodOf: LeafClass | None = None
+        self.constructorOf: LeafClass | None = None
         self.customSignature: Callable | None = None
 
         self.cName: str | None = None
+
+        self.isMain: bool = False
 
 
 
@@ -78,7 +81,7 @@ class LeafValue(abc.ABC):
     """Either a leaf chain or a leaf operator"""
 
     @abc.abstractmethod
-    def write(self) -> str:
+    def write(self, selfString: str | None = None) -> str:
         pass
 
 
@@ -111,11 +114,11 @@ class LeafChain(LeafValue):
         self.elements: list[LeafMention | LeafFunctionCall | int | float | str, bool] = elements
 
     
-    def write(self) -> str:
+    def write(self, selfString: str | None = None) -> str:
         """Returns the C code for the chain"""
         ##ugly as hell but I dont give a fuck
         import src.writer.valueWriter as valueWriter
-        return valueWriter.writeLeafChain(self)
+        return valueWriter.writeLeafChain(self, selfString)
         
 
 
@@ -183,9 +186,9 @@ class LeafOperator(LeafValue):
         self.leafFunctionCall: LeafFunctionCall = LeafFunctionCall(self.leafFunction, [], [self.left, self.right])
 
 
-    def write(self) -> str:
+    def write(self, selfString: str | None = None) -> str:
         """Returns the C code for the operator"""
-        return LeafChain([self.leafFunctionCall]).write()
+        return LeafChain([self.leafFunctionCall]).write(selfString)
     
     
 

@@ -40,7 +40,7 @@ class Compiler:
             print(compilerError)
             exit(1)
 
-        self._setMainFunction(root)
+        mainFunction = self._setMainFunction(root)
 
         classPass = ClassPass()
         compilerError = classPass.run(root)
@@ -54,6 +54,9 @@ class Compiler:
             print(compilerError)
             exit(1)
 
+
+        mainFunction.children.append(nodes.ReturnNode(1, mainFunction, structures.LeafChain([0])))
+
         
 
         return root
@@ -61,12 +64,13 @@ class Compiler:
 
 
 
-    def _setMainFunction(self, root: nodes.ScopeNode) -> None:
-        """Sets the main function to the first function in the root"""
+    def _setMainFunction(self, root: nodes.ScopeNode) -> nodes.LeafFunctionDeclarationNode:
+        """Sets the main function to the first function in the root, returns it"""
         
 
         mainLeafFunction = structures.LeafFunction("main", [], [], structures.LeafMention(None, BASE_CLASSES.INT_CLASS, []))
         mainLeafFunction.cName = "main"
+        mainLeafFunction.isMain = True
 
         mainLeafFunctionNode = nodes.LeafFunctionDeclarationNode(1, root, mainLeafFunction)
 
@@ -76,5 +80,7 @@ class Compiler:
             child.parent = mainLeafFunctionNode
 
         root.children.append(mainLeafFunctionNode)
+
+        return mainLeafFunctionNode
 
 
