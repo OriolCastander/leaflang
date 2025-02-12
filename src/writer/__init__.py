@@ -43,7 +43,7 @@ class Writer:
         
 
         elif type(node) == nodes.ScopeNode:
-            return self._writeScopeNode(node, writeEntryOpenCurly=node != self.entryNode)
+            return self._writeScopeNode(node, writeEntryOpenCurly=node != self.entryNode, writeScopeCalls=node != self.entryNode)
         
         
         elif type(node) == nodes.NakedLeafFunctionCallNode:
@@ -103,7 +103,6 @@ class Writer:
         if leafFunction.isMain:
             string += self._writeMainFunctionAddons()
         
-        string += "\t" * (self.nIndentations + 1) + "__LEAF_openScope(__LEAF_SCOPES);\n"
 
         string += self._writeScopeNode(leafFunctionDeclarationNode, writeEntryOpenCurly=False)
 
@@ -140,7 +139,7 @@ class Writer:
 
 
 
-    def _writeScopeNode(self, scopeNode: nodes.ScopeNode, writeEntryOpenCurly: bool) -> str:
+    def _writeScopeNode(self, scopeNode: nodes.ScopeNode, writeEntryOpenCurly: bool, writeScopeCalls: bool = True) -> str:
         """Returns the string of the scope node. Writes the entry curly if requested to, indents in and out, and writes the closing curly"""
         
         string = ""
@@ -149,9 +148,16 @@ class Writer:
         
         self.nIndentations += 1
 
+        if writeScopeCalls:
+            string += "\t" * self.nIndentations + "__LEAF_openScope(__LEAF_SCOPES);\n"
+
         for child in scopeNode.children:
             string += self._writeNode(child)
 
+
+        if writeScopeCalls:
+            string += "\t" * self.nIndentations + "__LEAF_closeScope(__LEAF_SCOPES, __LEAF_HEAP_ALLOCATIONS);\n"
+        
         self.nIndentations -= 1
 
         if self.nIndentations >= 0:

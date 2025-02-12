@@ -133,3 +133,17 @@ class ScopeClosure(Sentence):
 
     def __repr__(self) -> str:
         return f"ScopeClosure"
+    
+
+
+class ScopeOpening(Sentence):
+    """
+    A simple scope opening without an if or function or while or anything
+    """
+
+    def __init__(self, line: int) -> None:
+        super().__init__(line)
+
+    def __repr__(self) -> str:
+        return f"ScopeOpening"
+        

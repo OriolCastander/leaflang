@@ -69,7 +69,6 @@ def writeLeafFunctionCall(leafFunctionCall: structures.LeafFunctionCall, selfStr
     if leafFunctionCall.leafFunction.constructorOf is not None:
         if selfString is None: raise Exception("Self string is required for constructor calls")
         string += ", " + selfString
-        if len(leafFunctionCall.arguments) > 0: string += ", "
 
 
     elif leafFunctionCall.leafFunction.methodOf is not None:
@@ -77,7 +76,7 @@ def writeLeafFunctionCall(leafFunctionCall: structures.LeafFunctionCall, selfStr
         raise NotImplementedError()
     
     for argument, parameter in zip(leafFunctionCall.arguments, leafFunctionCall.leafFunction.parameters):
-       
+        string += ", "
         argumentString = argument.write()
 
         ##TODO: PUT THIS SOMEWHERE ELSE BECAUSE WE'LL NEED TO REUSE IT

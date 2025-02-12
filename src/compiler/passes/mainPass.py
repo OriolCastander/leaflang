@@ -12,7 +12,7 @@ class MainPass:
 
     def __init__(self) -> None:
         
-        self.transformer = Transformer(allowedSentences=[sentences.NakedLeafFunctionCall, sentences.Assignment, sentences.LeafVariableDeclaration, sentences.ReturnSentence])
+        self.transformer = Transformer(allowedSentences=[sentences.NakedLeafFunctionCall, sentences.Assignment, sentences.LeafVariableDeclaration, sentences.ReturnSentence, sentences.ScopeOpening])
         self.currentNode: nodes.ScopeNode
 
 
@@ -36,7 +36,8 @@ class MainPass:
             ##maybe this can be done in the transformer?
             self.currentNode.children[self.currentNode.children.index(node)] = treeNode
 
-
+            node = treeNode
+        
             
 
         if isinstance(node, nodes.ScopeNode):

@@ -69,6 +69,12 @@ class Parser:
             self.index += 1
             return scopeClosure
         
+
+        elif token.kind == TokenKind.OPEN_CUR:
+            scopeOpening = sentences.ScopeOpening(token.line)
+            self.index += 1
+            return scopeOpening
+        
         elif token.kind == TokenKind.STRING:
 
             word: words.Chain = self._consumeValue(allowOperators=False, allowBaseValues=False, allowFunctionCalls=True)

@@ -91,6 +91,9 @@ class Transformer:
         elif type(scaffoldingNode.element) == sentences.ReturnSentence:
             returnStructure = self._constructReturnStructure(scaffoldingNode.element, scaffoldingNode)
             return returnStructure
+        
+        elif type(scaffoldingNode.element) == sentences.ScopeOpening:
+            return nodes.ScopeNode(scaffoldingNode.line, scaffoldingNode.parent)
 
         else:
             raise Exception(f"Unknown sentence type: {type(scaffoldingNode.element)}")
@@ -217,7 +220,7 @@ class Transformer:
         
         ##TALLOCATION AND PASSING
         allocation = leafVariableDeclarationSentence.allocation
-        passing = leafClass.passing ##in the future, this may be decided elsewhere and be part of the sentence
+        passing = PASSING.REFERENCE ##TODO: change this, currently a hack
         if allocation == ALLOCATION.HEAP: passing = PASSING.REFERENCE
         
         leafMention = structures.LeafMention(variableName, leafClass, generics, allocation=allocation, passing=passing)
