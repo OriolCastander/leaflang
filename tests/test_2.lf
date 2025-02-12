@@ -1,0 +1,10 @@
+{
+    var a: int;
+    a = 5;
+    printInt(a);
+}
+
+
+var b: int;
+b = 10;
+printInt(b);

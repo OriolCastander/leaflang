@@ -1,0 +1,13 @@
+class Car{
+    var speed: int;
+}
+
+
+var car: Car;
+car = Car(10);
+
+printInt(car.speed);
+
+car.speed = 20;
+
+printInt(car.speed);

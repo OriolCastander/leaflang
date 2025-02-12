@@ -1,0 +1,2 @@
+Your int is: 10
+Your int is: 20

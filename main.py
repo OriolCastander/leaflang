@@ -1,5 +1,6 @@
 
 import os
+import argparse
 
 from src.tokenizer import Tokenizer
 from src.parser import Parser
@@ -73,10 +74,21 @@ def run(programPath: str, outputPath: str, deleteCFile: bool = False) -> None:
 
 def main():
 
-    ast = compile("examples/test.lf", printTokens=True, printSentences=True)
-    write(ast, "examples/test.c", printCProgram=True)
+    parser = argparse.ArgumentParser()
+    parser.add_argument('file', type=str, help="The path to the file to compile")
+    parser.add_argument('--print-tokens', action='store_true', help="Print the tokens")
+    parser.add_argument('--print-sentences', action='store_true', help="Print the sentences")
+    parser.add_argument('--print-c-program', action='store_true', help="Print the c program")
+    parser.add_argument('--maintain-c-file', action='store_true', help="Delete the c file")
 
-    run("examples/test.c", "examples/test", deleteCFile=False)
+    args = parser.parse_args()
+    
+
+
+    ast = compile(args.file, printTokens=args.print_tokens, printSentences=args.print_sentences)
+    write(ast, args.file.replace(".lf", ".c"), printCProgram=args.print_c_program)
+
+    run(args.file.replace(".lf", ".c"), args.file.replace(".lf", ""), deleteCFile= not args.maintain_c_file)
 
 
 
