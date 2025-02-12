@@ -168,8 +168,9 @@ class Writer:
         leafClass = leafVariableDeclarationNode.variable.leafClass
         
         if leafVariableDeclarationNode.variable.allocation == ALLOCATION.STACK:
-            cDeclarationString = leafClass.cName + " " + leafVariableDeclarationNode.variable.name + ";"
-            return "\t" * self.nIndentations + cDeclarationString + "\n"
+            cStackDeclarationString = leafClass.cName + " " + leafVariableDeclarationNode.variable.name + "__STACK;"
+            cDeclarationString = f"{leafClass.cName}* {leafVariableDeclarationNode.variable.cName} = &{leafVariableDeclarationNode.variable.cName}__STACK;"
+            return "\t" * self.nIndentations + cStackDeclarationString + "\n" + "\t" * self.nIndentations + cDeclarationString + "\n"
         
         elif leafVariableDeclarationNode.variable.allocation == ALLOCATION.HEAP:
             declarationString = leafClass.cName + "* " + leafVariableDeclarationNode.variable.name + " = malloc(sizeof(" + leafClass.cName + "));"
