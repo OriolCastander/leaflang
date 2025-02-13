@@ -49,6 +49,7 @@ class MainPass:
                 if compilerError is not None:
                     return compilerError
                 
+            self.currentNode = node.parent
 
 
 
