@@ -61,6 +61,9 @@ class Writer:
         elif type(node) == nodes.ReturnNode:
             return self._writeReturnNode(node)
         
+        elif type(node) == nodes.LeafIfStatementNode:
+            return self._writeLeafIfStatement(node)
+        
         
         else:
             raise Exception(f"Canot write node of type {type(node)}")
@@ -227,6 +230,19 @@ class Writer:
         string = "\t" * self.nIndentations + "__LEAF_closeScope(__LEAF_SCOPES, __LEAF_HEAP_ALLOCATIONS);\n"
 
         return string + "\t" * self.nIndentations + "return " + returnNode.value.write() + ";\n"
+    
+
+
+
+    def _writeLeafIfStatement(self, leafIfStatementNode: nodes.LeafIfStatementNode) -> str:
+        """Writes the leaf if statement"""
+
+        string = "\t" * self.nIndentations + "if (" + leafIfStatementNode.condition.write() + ") {\n"        
+        string += self._writeScopeNode(leafIfStatementNode, writeEntryOpenCurly=False)
+
+        return string
+
+
 
     def _getStringDefaultStart(self) -> str:
         

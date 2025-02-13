@@ -147,3 +147,19 @@ class ScopeOpening(Sentence):
     def __repr__(self) -> str:
         return f"ScopeOpening"
         
+
+
+
+
+class LeafIfStatement(Sentence):
+    """
+    A simple if statement
+    """
+    def __init__(self, line: int, condition: words.Operator) -> None:
+        super().__init__(line)
+
+        self.condition: words.Operator = condition
+
+
+    def __repr__(self) -> str:
+        return f"LeafIfStatement: {self.condition}"

@@ -80,9 +80,14 @@ def main():
     parser.add_argument('--print-sentences', action='store_true', help="Print the sentences")
     parser.add_argument('--print-c-program', action='store_true', help="Print the c program")
     parser.add_argument('--maintain-c-file', action='store_true', help="Delete the c file")
+    parser.add_argument('--debug', action='store_true', help="Full debug mode (print tokens, sentences, c program)")
 
     args = parser.parse_args()
-    
+
+    if args.debug:
+        args.print_tokens = True
+        args.print_sentences = True
+        args.print_c_program = True
 
 
     ast = compile(args.file, printTokens=args.print_tokens, printSentences=args.print_sentences)

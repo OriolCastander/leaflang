@@ -62,6 +62,9 @@ class Parser:
 
         elif token.kind == TokenKind.STRING and token.value == "return":
             return self._parseReturnSentence()
+        
+        elif token.kind == TokenKind.STRING and token.value == "if":
+            return self._parseLeafIfStatement()
 
         
         elif token.kind == TokenKind.CLOSE_CUR:
@@ -295,6 +298,41 @@ class Parser:
         self.index += 1
 
         return sentences.ReturnSentence(token.line, value)
+    
+
+
+
+    def _parseLeafIfStatement(self) -> sentences.LeafIfStatement:
+        """Parses a if statement"""
+
+        self.index += 1
+
+        token = self.tokens[self.index]
+        if token.kind != TokenKind.OPEN_PAR:
+            print(f"PARSING ERROR (line {token.line}): Expected an open parenthesis to start the if statement.")
+            exit(1)
+        self.index += 1
+
+        condition = self._consumeValue(allowOperators=True, allowBaseValues=True, allowFunctionCalls=True)
+
+
+        token = self.tokens[self.index]
+        if token.kind != TokenKind.CLOSE_PAR:
+            print(f"PARSING ERROR (line {token.line}): Expected a closing parenthesis after the if statement.")
+            exit(1)
+        self.index += 1
+
+        token = self.tokens[self.index]
+        if token.kind != TokenKind.OPEN_CUR:
+            print(f"PARSING ERROR (line {token.line}): Expected an open curly after the if statement.")
+            exit(1)
+        self.index += 1
+
+        return sentences.LeafIfStatement(token.line, condition)
+        
+
+
+
 
     def _consumeEnumerable(self, closingTokenKind: TokenKind, allowOperators: bool = True, allowBaseValues: bool = True, allowFunctionCalls: bool = True) -> list[words.Chain | words.Operator]:
         """
@@ -335,7 +373,7 @@ class Parser:
         """
 
         CLOSURE_TOKEN_KINDS = [TokenKind.SEMICOLON, TokenKind.COMMA, TokenKind.COLON, TokenKind.CLOSE_PAR, TokenKind.EQUALS, TokenKind.CLOSE_ANG, TokenKind.OPEN_ANG, TokenKind.OPEN_CUR]
-        OPERATOR_TOKEN_KINDS = [TokenKind.PLUS]
+        OPERATOR_TOKEN_KINDS = [TokenKind.PLUS, TokenKind.OPEN_ANG, TokenKind.CLOSE_ANG]
 
         elements: list[words.Mention | words.LeafFunctionCallWord | str | int | float | bool] = []
         

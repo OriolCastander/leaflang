@@ -11,3 +11,19 @@ printInt(car.speed);
 car.speed = 20;
 
 printInt(car.speed);
+
+
+if (car.speed > 10) {
+    printInt(30);
+}
+
+if (car.speed + 20 < 10) {
+    printInt(40);
+}
+
+
+
+
+
+
+

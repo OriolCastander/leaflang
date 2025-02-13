@@ -40,15 +40,13 @@ class ScaffoldingPass:
     def _parseSentence(self, sentence: sentences.Sentence) -> None:
         """Parses a sentence into the scafolding tree"""
         
-        if type(sentence) in [sentences.LeafClassDeclaration, sentences.LeafFunctionDeclaration]:
+        if type(sentence) in [sentences.LeafClassDeclaration, sentences.LeafFunctionDeclaration, sentences.ScopeOpening, sentences.LeafIfStatement]:
             self._parseNewScopeDeclaration(sentence)
 
 
         elif type(sentence) in [sentences.LeafVariableDeclaration, sentences.NakedLeafFunctionCall, sentences.Assignment, sentences.ReturnSentence]:
             self._parseStandard(sentence)
 
-        elif type(sentence) == sentences.ScopeOpening:
-            self._parseScopeOpeningDeclaration(sentence)
         
         elif type(sentence) == sentences.ScopeClosure:
             self._parseEndScopeDeclaration(sentence)
@@ -74,12 +72,6 @@ class ScaffoldingPass:
 
 
 
-    def _parseScopeOpeningDeclaration(self, sentence: sentences.Sentence) -> None:
-        """Parses a declaration that opens a scope"""
-
-        scaffoldingNode: ScaffoldingNode = ScaffoldingNode(sentence.line, self.currentNode, sentence)
-        self.currentNode.children.append(scaffoldingNode)
-        self.currentNode = scaffoldingNode
 
 
     def _parseEndScopeDeclaration(self, sentence: sentences.Sentence) -> None:

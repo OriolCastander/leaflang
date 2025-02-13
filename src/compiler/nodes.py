@@ -190,6 +190,15 @@ class ReturnNode(TreeNode):
 
 
 
+class LeafIfStatementNode(ScopeNode):
+
+    def __init__(self, line: int, parent: ScopeNode, condition: structures.LeafOperator) -> None:
+        super().__init__(line, parent)
+
+        self.condition: structures.LeafOperator = condition
+
+
+
 #functions that apply to both scope nodes and scaffolding nodes
 
 def _getAll(node: TreeNode | ScaffoldingNode, *leafStructures: type, recursive: bool = False, includeBase: bool = False) -> list[structures.LeafMention | structures.LeafFunction | structures.LeafClass]:

@@ -94,6 +94,9 @@ class Transformer:
         
         elif type(scaffoldingNode.element) == sentences.ScopeOpening:
             return nodes.ScopeNode(scaffoldingNode.line, scaffoldingNode.parent)
+        
+        elif type(scaffoldingNode.element) == sentences.LeafIfStatement:
+            return self._constructLeafIfStatement(scaffoldingNode.element, scaffoldingNode)
 
         else:
             raise Exception(f"Unknown sentence type: {type(scaffoldingNode.element)}")
@@ -278,6 +281,17 @@ class Transformer:
 
 
 
+    def _constructLeafIfStatement(self, leafIfStatement: sentences.LeafIfStatement, scaffoldingNode: ScaffoldingNode) -> nodes.LeafIfStatementNode | compilerErrors.CompilerError:
+        """Constructs a leaf if statement"""
+
+        condition = constructLeafValue(leafIfStatement.condition, scaffoldingNode)
+        if isinstance(condition, compilerErrors.CompilerError):
+            return condition
+        return nodes.LeafIfStatementNode(leafIfStatement.line, scaffoldingNode.parent, condition)
+
+
+
+
 def constructLeafValue(word: words.Chain | words.Operator, originNode: nodes.TreeNode | nodes.ScaffoldingNode) -> structures.LeafValue | compilerErrors.CompilerError:
     """
     Constructs a leaf value from a word chain or operator
@@ -411,8 +425,6 @@ def constructLeafValue(word: words.Chain | words.Operator, originNode: nodes.Tre
         if operatorFunction is None:
             return compilerErrors.InvalidOperatorError(originNode.line, originNode, leftValueClass, word.operatorKind)
 
-        if leftValueClass != operatorFunction.ret.leafClass:
-            return compilerErrors.LeafClassMismatchError(originNode.line, originNode, operatorFunction.ret.leafClass, rightValueClass)
 
 
         

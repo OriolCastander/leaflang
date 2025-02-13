@@ -7,12 +7,15 @@ import src.parser.words as words
 from src.compiler.transformer import Transformer
 
 
+MAIN_PASS_ALLOWED_SENTENCES = [sentences.NakedLeafFunctionCall, sentences.Assignment, sentences.LeafVariableDeclaration, sentences.ReturnSentence,
+                               sentences.ScopeOpening, sentences.LeafIfStatement]
+
 class MainPass:
 
 
     def __init__(self) -> None:
         
-        self.transformer = Transformer(allowedSentences=[sentences.NakedLeafFunctionCall, sentences.Assignment, sentences.LeafVariableDeclaration, sentences.ReturnSentence, sentences.ScopeOpening])
+        self.transformer = Transformer(allowedSentences=MAIN_PASS_ALLOWED_SENTENCES)
         self.currentNode: nodes.ScopeNode
 
 
