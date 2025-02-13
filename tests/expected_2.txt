@@ -1,2 +1,4 @@
-Your int is: 5
 Your int is: 10
+Your int is: 2
+Your int is: 3
+Your int is: 4

@@ -8,7 +8,7 @@ from src.compiler.transformer import Transformer
 
 
 MAIN_PASS_ALLOWED_SENTENCES = [sentences.NakedLeafFunctionCall, sentences.Assignment, sentences.LeafVariableDeclaration, sentences.ReturnSentence,
-                               sentences.ScopeOpening, sentences.LeafIfStatement]
+                               sentences.ScopeOpening, sentences.LeafIfStatement, sentences.LeafWhileStatement]
 
 class MainPass:
 

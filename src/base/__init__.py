@@ -7,4 +7,4 @@ BASE_CLASSES = BaseClasses()
 BASE_FUNCTIONS = BaseFunctions(BASE_CLASSES)
 
 ###KEYWORDS OF THE LANGUAGE
-KEYWORDS = ["class", "def", "main", "var", "let", "return"]
+KEYWORDS = ["class", "def", "main", "var", "let", "return", "if", "while"]

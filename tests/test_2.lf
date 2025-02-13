@@ -1,10 +1,15 @@
 {
     var a: int;
-    a = 5;
+    a = 10;
     printInt(a);
 }
 
 
 var b: int;
-b = 10;
-printInt(b);
+b = 2;
+
+
+while (b < 5) {
+    printInt(b);
+    b = b + 1;
+}

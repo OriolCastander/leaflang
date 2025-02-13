@@ -40,7 +40,7 @@ class ScaffoldingPass:
     def _parseSentence(self, sentence: sentences.Sentence) -> None:
         """Parses a sentence into the scafolding tree"""
         
-        if type(sentence) in [sentences.LeafClassDeclaration, sentences.LeafFunctionDeclaration, sentences.ScopeOpening, sentences.LeafIfStatement]:
+        if type(sentence) in [sentences.LeafClassDeclaration, sentences.LeafFunctionDeclaration, sentences.ScopeOpening, sentences.LeafIfStatement, sentences.LeafWhileStatement]:
             self._parseNewScopeDeclaration(sentence)
 
 

@@ -163,3 +163,19 @@ class LeafIfStatement(Sentence):
 
     def __repr__(self) -> str:
         return f"LeafIfStatement: {self.condition}"
+    
+
+
+
+class LeafWhileStatement(Sentence):
+    """
+    A simple while statement
+    """
+    def __init__(self, line: int, condition: words.Operator) -> None:
+        super().__init__(line)
+
+        self.condition: words.Operator = condition
+
+
+    def __repr__(self) -> str:
+        return f"LeafWhileStatement: {self.condition}"

@@ -64,6 +64,9 @@ class Writer:
         elif type(node) == nodes.LeafIfStatementNode:
             return self._writeLeafIfStatement(node)
         
+        elif type(node) == nodes.LeafWhileStatementNode:
+            return self._writeLeafWhileStatement(node)
+        
         
         else:
             raise Exception(f"Canot write node of type {type(node)}")
@@ -239,6 +242,15 @@ class Writer:
 
         string = "\t" * self.nIndentations + "if (" + leafIfStatementNode.condition.write() + ") {\n"        
         string += self._writeScopeNode(leafIfStatementNode, writeEntryOpenCurly=False)
+
+        return string
+    
+
+    def _writeLeafWhileStatement(self, leafWhileStatementNode: nodes.LeafWhileStatementNode) -> str:
+        """Writes the leaf while statement"""
+
+        string = "\t" * self.nIndentations + "while (" + leafWhileStatementNode.condition.write() + ") {\n"
+        string += self._writeScopeNode(leafWhileStatementNode, writeEntryOpenCurly=False)
 
         return string
 

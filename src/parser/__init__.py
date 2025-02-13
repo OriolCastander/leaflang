@@ -65,6 +65,9 @@ class Parser:
         
         elif token.kind == TokenKind.STRING and token.value == "if":
             return self._parseLeafIfStatement()
+        
+        elif token.kind == TokenKind.STRING and token.value == "while":
+            return self._parseLeafWhileStatement()
 
         
         elif token.kind == TokenKind.CLOSE_CUR:
@@ -329,12 +332,42 @@ class Parser:
         self.index += 1
 
         return sentences.LeafIfStatement(token.line, condition)
+    
+
+
+    def _parseLeafWhileStatement(self) -> sentences.LeafWhileStatement:
+        """Parses a while statement"""
+
+        self.index += 1
+
+        token = self.tokens[self.index]
+        if token.kind != TokenKind.OPEN_PAR:
+            print(f"PARSING ERROR (line {token.line}): Expected an open parenthesis to start the if statement.")
+            exit(1)
+        self.index += 1
+
+        condition = self._consumeValue(allowOperators=True, allowBaseValues=True, allowFunctionCalls=True)
+
+
+        token = self.tokens[self.index]
+        if token.kind != TokenKind.CLOSE_PAR:
+            print(f"PARSING ERROR (line {token.line}): Expected a closing parenthesis after the if statement.")
+            exit(1)
+        self.index += 1
+
+        token = self.tokens[self.index]
+        if token.kind != TokenKind.OPEN_CUR:
+            print(f"PARSING ERROR (line {token.line}): Expected an open curly after the if statement.")
+            exit(1)
+        self.index += 1
+
+        return sentences.LeafWhileStatement(token.line, condition)
         
 
 
 
 
-    def _consumeEnumerable(self, closingTokenKind: TokenKind, allowOperators: bool = True, allowBaseValues: bool = True, allowFunctionCalls: bool = True) -> list[words.Chain | words.Operator]:
+    def _consumeEnumerable(self, closingTokenKind: TokenKind, allowOperators: bool = True, allowBaseValues: bool = True, allowFunctionCalls: bool = True, failable: bool = False) -> list[words.Chain | words.Operator] | None:
         """
         Consumes a list of values, either chains or operators.
         """
@@ -356,8 +389,11 @@ class Parser:
                 self.index += 1
                 continue
             else:
-                print(f"PARSING ERROR (line {nextToken.line}): Expected a comma or {closingTokenKind.name}, got {nextToken}.")
-                exit(1)
+                if failable:
+                    return None
+                else:
+                    print(f"PARSING ERROR (line {nextToken.line}): Expected a comma or {closingTokenKind.name}, got {nextToken}.")
+                    exit(1)
 
         return values
 
@@ -423,8 +459,11 @@ class Parser:
                 generics = []
                 if nextToken.kind == TokenKind.OPEN_ANG:
                     beforePotentialGenericsIndex = self.index
-                    generics = self._consumeEnumerable(TokenKind.CLOSE_ANG, allowOperators=False, allowBaseValues=False, allowFunctionCalls=False)
-                    self.index = beforePotentialGenericsIndex
+                    generics = self._consumeEnumerable(TokenKind.CLOSE_ANG, allowOperators=False, allowBaseValues=False, allowFunctionCalls=False, failable=True)
+                    if generics is None:
+                        self.index = beforePotentialGenericsIndex
+                        elements.append(words.Mention(token.value))
+                        continue
 
                     secondNextToken = self.tokens[self.index]
                     if secondNextToken.kind == TokenKind.OPEN_PAR:
@@ -437,7 +476,7 @@ class Parser:
 
                     else:
                         self.index = beforePotentialGenericsIndex
-                        return words.Chain([elements])
+                        return words.Chain([elements]) ##? NOT SURE WHY ON EARTH WE ARE DOING THIS
 
                 elif nextToken.kind == TokenKind.OPEN_PAR:
                     if not allowFunctionCalls:

@@ -97,6 +97,9 @@ class Transformer:
         
         elif type(scaffoldingNode.element) == sentences.LeafIfStatement:
             return self._constructLeafIfStatement(scaffoldingNode.element, scaffoldingNode)
+        
+        elif type(scaffoldingNode.element) == sentences.LeafWhileStatement:
+            return self._constructLeafWhileStatement(scaffoldingNode.element, scaffoldingNode)
 
         else:
             raise Exception(f"Unknown sentence type: {type(scaffoldingNode.element)}")
@@ -288,6 +291,15 @@ class Transformer:
         if isinstance(condition, compilerErrors.CompilerError):
             return condition
         return nodes.LeafIfStatementNode(leafIfStatement.line, scaffoldingNode.parent, condition)
+    
+
+    def _constructLeafWhileStatement(self, leafWhileStatement: sentences.LeafWhileStatement, scaffoldingNode: ScaffoldingNode) -> nodes.LeafWhileStatementNode | compilerErrors.CompilerError:
+        """Constructs a leaf while statement"""
+
+        condition = constructLeafValue(leafWhileStatement.condition, scaffoldingNode)
+        if isinstance(condition, compilerErrors.CompilerError):
+            return condition
+        return nodes.LeafWhileStatementNode(leafWhileStatement.line, scaffoldingNode.parent, condition)
 
 
 
