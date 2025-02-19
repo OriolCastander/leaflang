@@ -24,6 +24,7 @@ class TokenKind(IntEnum):
     PIPE = 17 # | 
     AND = 18 # &
     PERCENT = 19 # %
+    MINUS = 20 # -
 
 
 class Token:

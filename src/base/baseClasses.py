@@ -64,6 +64,11 @@ class BaseClasses:
         sumOperator.cName = sumOperator.name
         self.INT_CLASS.operators[OperatorKind.SUM] = sumOperator
 
+        minusOperator = structures.LeafFunction("int__operator__MINUS", [], None, structures.LeafMention(None, self.INT_CLASS, []))
+        minusOperator.customSignature = _simpleOperatorCustomSignatureConstructor("-")
+        minusOperator.cName = minusOperator.name
+        self.INT_CLASS.operators[OperatorKind.MINUS] = minusOperator
+
 
         lessThanOperator = structures.LeafFunction("int__operator__LESS_THAN", [], None, structures.LeafMention(None, self.BOOL_CLASS, []))
         lessThanOperator.customSignature = _simpleOperatorCustomSignatureConstructor("<")

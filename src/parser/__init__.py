@@ -409,7 +409,7 @@ class Parser:
         """
 
         CLOSURE_TOKEN_KINDS = [TokenKind.SEMICOLON, TokenKind.COMMA, TokenKind.COLON, TokenKind.CLOSE_PAR, TokenKind.EQUALS, TokenKind.CLOSE_ANG, TokenKind.OPEN_ANG, TokenKind.OPEN_CUR]
-        OPERATOR_TOKEN_KINDS = [TokenKind.PLUS, TokenKind.OPEN_ANG, TokenKind.CLOSE_ANG]
+        OPERATOR_TOKEN_KINDS = [TokenKind.PLUS, TokenKind.OPEN_ANG, TokenKind.CLOSE_ANG, TokenKind.MINUS]
 
         elements: list[words.Mention | words.LeafFunctionCallWord | str | int | float | bool] = []
         

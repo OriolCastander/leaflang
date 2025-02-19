@@ -221,6 +221,9 @@ def _getAll(node: TreeNode | ScaffoldingNode, *leafStructures: type, recursive: 
 
 
     if type(node) == LeafFunctionDeclarationNode:
+        ##include ourselves
+        validStructures.append(node.function)
+        
         ##include the params
         for parameter in node.function.parameters:
             validStructures.append(parameter)

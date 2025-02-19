@@ -88,6 +88,7 @@ def main():
         args.print_tokens = True
         args.print_sentences = True
         args.print_c_program = True
+        args.maintain_c_file = True
 
 
     ast = compile(args.file, printTokens=args.print_tokens, printSentences=args.print_sentences)

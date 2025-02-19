@@ -45,6 +45,8 @@ class Operator:
     def tokenToOperatorKind(token: Token) -> OperatorKind:
         if token.kind == TokenKind.PLUS:
             return OperatorKind.SUM
+        elif token.kind == TokenKind.MINUS:
+            return OperatorKind.MINUS
         elif token.kind == TokenKind.OPEN_ANG:
             return OperatorKind.LESS_THAN
         elif token.kind == TokenKind.CLOSE_ANG:

@@ -16,6 +16,7 @@ class PASSING(IntEnum):
 
 class OperatorKind(StrEnum):
     SUM = "+"
+    MINUS = "-"
     LESS_THAN = "<"
     GREATER_THAN = ">"
     

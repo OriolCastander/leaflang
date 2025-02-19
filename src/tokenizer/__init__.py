@@ -97,7 +97,8 @@ class Tokenizer:
         if char == "|": return Token(TokenKind.PIPE, None, line)
         if char == "&": return Token(TokenKind.AND, None, line)
         if char == "%": return Token(TokenKind.PERCENT, None, line)
-
+        if char == "-": return Token(TokenKind.MINUS, None, line)
+        
         raise Exception(f"Character {char} in line {line} is not allowed")
 
 

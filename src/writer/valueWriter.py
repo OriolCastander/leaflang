@@ -84,11 +84,16 @@ def writeLeafFunctionCall(leafFunctionCall: structures.LeafFunctionCall, selfStr
             if len(argument.elements) == 1 and type(argument.elements[0]) in [int, float]:
                 string += f"{argumentString}"
                 continue
+        
+        argumentPassing = argument.getFinalPassing()
 
-        if parameter.passing == PASSING.REFERENCE:
+        if parameter.passing == PASSING.REFERENCE and argumentPassing == PASSING.REFERENCE:
             string += argumentString
-        elif parameter.passing == PASSING.VALUE:
+        elif parameter.passing == PASSING.VALUE and argumentPassing == PASSING.REFERENCE:
             string += "*" + argumentString
-
+        elif parameter.passing == PASSING.REFERENCE and argumentPassing == PASSING.VALUE:
+            raise NotImplementedError("Cannot pass value by reference")
+        elif parameter.passing == PASSING.VALUE and argumentPassing == PASSING.VALUE:
+            string += argumentString
     string += ")"
     return string
