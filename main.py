@@ -83,6 +83,8 @@ def main():
     parser.add_argument('--c-debug-level', type=int, help="Debug level for the c program", default=0)
     parser.add_argument('--debug', action='store_true', help="Full debug mode (print tokens, sentences, c program)")
 
+    parser.add_argument('--only-compile', action='store_true', help="Only compile the program, do not run it")
+
     args = parser.parse_args()
 
     if args.debug:
@@ -92,10 +94,14 @@ def main():
         args.maintain_c_file = True
         args.c_debug_level = 1
 
+    if args.only_compile:
+        args.maintain_c_file = True
+
     ast = compile(args.file, printTokens=args.print_tokens, printSentences=args.print_sentences)
     write(ast, args.file.replace(".lf", ".c"), printCProgram=args.print_c_program, cDebugLevel=args.c_debug_level)
 
-    run(args.file.replace(".lf", ".c"), args.file.replace(".lf", ""), deleteCFile= not args.maintain_c_file)
+    if not args.only_compile:
+        run(args.file.replace(".lf", ".c"), args.file.replace(".lf", ""), deleteCFile= not args.maintain_c_file)
 
 
 
