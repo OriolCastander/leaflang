@@ -1,15 +1,11 @@
-{
-    var a: int;
-    a = 10;
-    printInt(a);
+
+def fibonnaci(n: int): int{
+    if (n < 2){
+        return n;
+    }
+    return fibonnaci(n - 1) + fibonnaci(n - 2);
 }
 
-
-var b: int;
-b = 2;
-
-
-while (b < 5) {
-    printInt(b);
-    b = b + 1;
-}
+printInt(fibonnaci(2));
+printInt(fibonnaci(5));
+printInt(fibonnaci(7));
