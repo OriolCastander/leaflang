@@ -188,6 +188,22 @@ class ReturnNode(TreeNode):
         self.value: structures.LeafValue = value
 
 
+    def getNLevelsToFunction(self) -> int:
+        """Returns the number of levels to the function that contains this return node"""
+        
+        currentNLevels = 1
+        currentNode = self.parent
+        while True:
+            if type(currentNode) == LeafFunctionDeclarationNode:
+                return currentNLevels
+
+            currentNLevels += 1
+            currentNode = currentNode.parent
+
+            if currentNode is None or not isinstance(currentNode, ScopeNode):
+                raise Exception("Return node not found in function")
+
+
 
 
 class LeafIfStatementNode(ScopeNode):
@@ -223,7 +239,7 @@ def _getAll(node: TreeNode | ScaffoldingNode, *leafStructures: type, recursive: 
     if type(node) == LeafFunctionDeclarationNode:
         ##include ourselves
         validStructures.append(node.function)
-        
+
         ##include the params
         for parameter in node.function.parameters:
             validStructures.append(parameter)

@@ -143,8 +143,11 @@ void __LEAF_HeapVariable_destructor(struct __LEAF_HeapVariable* self); //TODO_U
 
 //"UTILITY" ALL ROUNDER FUNCTIONS
 
-/** Creates a scope and appends it to the list */
-void __LEAF_openScope(struct __STD_List* SCOPES);
+/** Creates a scope and appends it to the list
+ * Debug level 0: No debug
+ * Debug level 1: Prints the opening of the scope
+*/
+void __LEAF_openScope(struct __STD_List* SCOPES, int debugLevel);
 
 /**
  * Inits a heap variable, creates the allocation for it if needed, and adds it to the scope.
@@ -155,8 +158,10 @@ void __LEAF_initHeapVariable(struct __STD_List* SCOPES, struct __STD_List* HEAP_
 
 /**
  * Destroys the scope
+ * Debug level 0: No debug
+ * Debug level 1: Prints the closing of the scope
  */
-void __LEAF_closeScope(struct __STD_List* SCOPES, struct __STD_List* HEAP_ALLOCATIONS);
+void __LEAF_closeScope(struct __STD_List* SCOPES, struct __STD_List* HEAP_ALLOCATIONS, int debugLevel);
 
 
 

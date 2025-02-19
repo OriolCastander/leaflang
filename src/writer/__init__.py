@@ -10,12 +10,12 @@ class Writer:
     The writer transforms the abstract syntax tree to the string that will become the c program
     """
 
-    def __init__(self) -> None:
+    def __init__(self, cDebugLevel: int = 0) -> None:
         ##MAYBE SOME CONFIG IN THE FUTURE?
 
         self.nIndentations: int = -1#start at -1 so that fist scope node gets us to 0
         self.entryNode: nodes.ScopeNode = None
-
+        self.cDebugLevel: int = cDebugLevel
 
     def write(self, entryNode: nodes.ScopeNode) -> str:
         """Outputs the c program"""
@@ -155,14 +155,14 @@ class Writer:
         self.nIndentations += 1
 
         if writeScopeCalls:
-            string += "\t" * self.nIndentations + "__LEAF_openScope(__LEAF_SCOPES);\n"
+            string += "\t" * self.nIndentations + f"__LEAF_openScope(__LEAF_SCOPES, {self.cDebugLevel});\n"
 
         for child in scopeNode.children:
             string += self._writeNode(child)
 
 
         if writeScopeCalls:
-            string += "\t" * self.nIndentations + "__LEAF_closeScope(__LEAF_SCOPES, __LEAF_HEAP_ALLOCATIONS);\n"
+            string += "\t" * self.nIndentations + f"__LEAF_closeScope(__LEAF_SCOPES, __LEAF_HEAP_ALLOCATIONS, {self.cDebugLevel});\n"
         
         self.nIndentations -= 1
 
@@ -230,9 +230,12 @@ class Writer:
     def _writeReturnNode(self, returnNode: nodes.ReturnNode) -> str:
         """Writes the return node"""
 
-        string = "\t" * self.nIndentations + "__LEAF_closeScope(__LEAF_SCOPES, __LEAF_HEAP_ALLOCATIONS);\n"
+        string = "\t" * self.nIndentations + "/** Return clause */   "
 
-        return string + "\t" * self.nIndentations + "return " + returnNode.value.write() + ";\n"
+        
+        string += f"for (int i=0; i<{returnNode.getNLevelsToFunction()}; i++) __LEAF_closeScope(__LEAF_SCOPES, __LEAF_HEAP_ALLOCATIONS, {self.cDebugLevel});\n"
+        string += "\t" * self.nIndentations + "return " + returnNode.value.write() + ";//Finish return clause\n"
+        return string
     
 
 

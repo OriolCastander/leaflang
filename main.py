@@ -46,10 +46,10 @@ def compile(programPath: str, printTokens: bool = False, printSentences: bool = 
 
 
 
-def write(ast: nodes.ScopeNode, programPath: str, printCProgram: bool = False) -> None:
+def write(ast: nodes.ScopeNode, programPath: str, printCProgram: bool = False, cDebugLevel: int = 0) -> None:
     """Writes the ast into a c program"""
 
-    writer = Writer()
+    writer = Writer(cDebugLevel)
     cProgram = writer.write(ast)
 
     if printCProgram:
@@ -80,6 +80,7 @@ def main():
     parser.add_argument('--print-sentences', action='store_true', help="Print the sentences")
     parser.add_argument('--print-c-program', action='store_true', help="Print the c program")
     parser.add_argument('--maintain-c-file', action='store_true', help="Delete the c file")
+    parser.add_argument('--c-debug-level', type=int, help="Debug level for the c program", default=0)
     parser.add_argument('--debug', action='store_true', help="Full debug mode (print tokens, sentences, c program)")
 
     args = parser.parse_args()
@@ -89,10 +90,10 @@ def main():
         args.print_sentences = True
         args.print_c_program = True
         args.maintain_c_file = True
-
+        args.c_debug_level = 1
 
     ast = compile(args.file, printTokens=args.print_tokens, printSentences=args.print_sentences)
-    write(ast, args.file.replace(".lf", ".c"), printCProgram=args.print_c_program)
+    write(ast, args.file.replace(".lf", ".c"), printCProgram=args.print_c_program, cDebugLevel=args.c_debug_level)
 
     run(args.file.replace(".lf", ".c"), args.file.replace(".lf", ""), deleteCFile= not args.maintain_c_file)
 

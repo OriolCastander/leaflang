@@ -126,12 +126,16 @@ void __LEAF_HeapVariable_destructor(struct __LEAF_HeapVariable* self){
 
 //GENERIC "UTILITY" STUFF
 
-void __LEAF_openScope(struct __STD_List* SCOPES){
+void __LEAF_openScope(struct __STD_List* SCOPES, int debugLevel){
 
     struct __LEAF_Scope* newScope = (struct __LEAF_Scope*)malloc(sizeof(struct __LEAF_Scope));
     __LEAF_Scope_constructor(newScope, SCOPES->size);
 
     __STD_List_add(SCOPES, newScope);
+
+    if (debugLevel > 0){
+        printf("DEBUG: Opening scope %d\n", newScope->level);
+    }
 }
 
 
@@ -183,11 +187,14 @@ void __LEAF_initHeapVariable(struct __STD_List* SCOPES, struct __STD_List* HEAP_
 
 
 
-void __LEAF_closeScope(struct __STD_List* SCOPES, struct __STD_List* HEAP_ALLOCATIONS){
+void __LEAF_closeScope(struct __STD_List* SCOPES, struct __STD_List* HEAP_ALLOCATIONS, int debugLevel){
 
     // STEP 1, REMOVE THE SCOPE, WILL TRIGGER THE DESTRUCTOR IN THE VARIABLES
     __STD_List_removeByIndex(SCOPES, SCOPES->size - 1);
 
+    if (debugLevel > 0){
+        printf("DEBUG: Closing scope %zu\n", SCOPES->size);
+    }
 
 }
 
