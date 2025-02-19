@@ -139,6 +139,12 @@ class Writer:
 
         ##TODO: write constructor + methods
         string += self._writeFunctionDeclaration(leafClassDeclarationNode.constructor)
+
+        for method in leafClass.methods.values():
+            for childNode in leafClassDeclarationNode.children:
+                if type(childNode) == nodes.LeafFunctionDeclarationNode and childNode.function.cName == method.cName:
+                    string += self._writeFunctionDeclaration(childNode)
+
         
         return string
     

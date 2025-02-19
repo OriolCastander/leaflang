@@ -31,7 +31,7 @@ def runTest(filePath: str, expectedStdoutLines: list[str], expectedExitCode: int
 
 def main():
 
-    testsRange = range(1, 3)
+    testsRange = range(1, 4)
 
     testFiles = [f"./tests/test_{i}.lf" for i in testsRange]
     expectedStdoutLines = [[l.replace("\n", "") for l in open(f"./tests/expected_{i}.txt").readlines()] for i in testsRange]

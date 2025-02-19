@@ -68,7 +68,16 @@ class Transformer:
             return nodes.LeafClassDeclarationNode(scaffoldingNode.line, scaffoldingNode.parent, leafClass)
         
         elif type(scaffoldingNode.element) == sentences.LeafFunctionDeclaration:
-            leafFunction = self._constructLeafFunction(scaffoldingNode.element, scaffoldingNode)
+            methodOf = None
+            if type(scaffoldingNode.parent) == nodes.LeafClassDeclarationNode:
+                methodOf = scaffoldingNode.parent.leafClass
+            
+            leafFunction = self._constructLeafFunction(scaffoldingNode.element, scaffoldingNode, methodOf)
+
+            if methodOf is not None:
+                leafFunction.cName = f"{methodOf.name}__{leafFunction.name}"
+                methodOf.methods[leafFunction.name] = leafFunction
+
             if isinstance(leafFunction, compilerErrors.CompilerError):
                 return leafFunction
             return nodes.LeafFunctionDeclarationNode(scaffoldingNode.line, scaffoldingNode.parent, leafFunction)
@@ -137,7 +146,7 @@ class Transformer:
 
 
 
-    def _constructLeafFunction(self, leafFunctionSentence: sentences.LeafFunctionDeclaration, scaffoldingNode: ScaffoldingNode) -> structures.LeafFunction | compilerErrors.CompilerError:
+    def _constructLeafFunction(self, leafFunctionSentence: sentences.LeafFunctionDeclaration, scaffoldingNode: ScaffoldingNode, methodOf: structures.LeafClass | None) -> structures.LeafFunction | compilerErrors.CompilerError:
         """Constructs a leaf function"""
 
         takenNames: list[str] = [structure.name for structure in scaffoldingNode.getAll(structures.LeafClass, structures.LeafFunction, recursive=True, includeBase=True)]
@@ -159,6 +168,12 @@ class Transformer:
 
         ##parameters
         parameters: list[structures.LeafMention] = []
+
+        if methodOf is not None:
+            selfParameter = structures.LeafMention("self", methodOf, [], PASSING.REFERENCE)
+            selfParameter.cName = "self"
+            parameters.append(selfParameter)
+
         for parameterWord in leafFunctionSentence.parameters:
 
             ##parameter name
@@ -403,8 +418,28 @@ def constructLeafValue(word: words.Chain | words.Operator, originNode: nodes.Tre
                     newElements.append(mention)
 
                 elif type(wordElement) == words.LeafFunctionCallWord:
-                    raise NotImplementedError()
-                
+                    
+                    method = insideClass.methods.get(wordElement.leafFunction.value)
+                    if method is None:
+                        return compilerErrors.InvalidNameError(originNode.line, originNode, wordElement.leafFunction.value)
+                    
+                    ##get the params
+                    arguments: list[structures.LeafValue] = []
+
+                    selfArgument = structures.LeafChain(newElements)
+                    arguments.append(selfArgument)
+
+                    for wordArgument in wordElement.arguments:
+                        argument = constructLeafValue(wordArgument, originNode)
+                        if isinstance(argument, compilerErrors.CompilerError):
+                            return argument
+                        arguments.append(argument)
+
+                    functionCallStructure = structures.LeafFunctionCall(method, [], arguments)
+                    newElements = [functionCallStructure]
+                    insideClass = method.ret.leafClass
+
+
                 else:##TODO: compiler error here 99% sure
                     raise Exception(f"Unknown word element type: {type(wordElement)}")
 

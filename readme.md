@@ -48,5 +48,5 @@ In development, check out the tests folders to see the current capabilities of t
 Stuff that is currently under development / under the intention of being developed.
 
  - Multiplication operator for ints.
- - Methods for classes.
+ - Methods for classes (done?).
  - Multiple files, imports.

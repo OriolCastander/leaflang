@@ -19,10 +19,14 @@ class MainPass:
         self.currentNode: nodes.ScopeNode
 
 
-    def run(self, root: nodes.ScopeNode) -> compilerErrors.CompilerError | None:
+    def run(self, root: nodes.ScopeNode, alternateCurrentNode: nodes.TreeNode | None = None) -> compilerErrors.CompilerError | None:
         """Runs the main pass"""
         
-        self.currentNode = root
+        if alternateCurrentNode is None:
+            self.currentNode = root
+        else:
+            self.currentNode = alternateCurrentNode
+
         return self._parseNode(root)
     
 

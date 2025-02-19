@@ -23,6 +23,7 @@ class ClassPass:
         
         self.transformer = Transformer(allowedSentences=[sentences.LeafVariableDeclaration])
         self.mainPasser = MainPass()
+        self.mainPasser.transformer.allowedSentences += [sentences.LeafFunctionDeclaration]###TODO: massive hack in here, should be done in some more intelligent way
         self.currentNode: nodes.ScopeNode
 
 
@@ -69,7 +70,7 @@ class ClassPass:
                 ###WE PARSE THE METHODS
 
                 if type(child.element) == sentences.LeafFunctionDeclaration:
-                    self.mainPasser.run(child) ##main passer constrcuts the method recursively
+                    self.mainPasser.run(child, alternateCurrentNode=node) ##main passer constrcuts the method recursively
 
                 else:
                     return compilerErrors.InvalidSentenceError(child.line, child, child.element)

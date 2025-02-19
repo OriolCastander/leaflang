@@ -1,0 +1,18 @@
+class Car{
+    var speed: int;
+
+
+    def printSpeed(): void{
+        printInt(self.speed);
+    }
+
+    def accelerate(amount: int): void{
+        self.speed = self.speed + amount;
+    }
+}
+
+var car: Car;
+car = Car(3);
+car.printSpeed();
+car.accelerate(5);
+car.printSpeed();
