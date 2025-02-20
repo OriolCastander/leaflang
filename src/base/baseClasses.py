@@ -39,11 +39,12 @@ class BaseClasses:
         self.INT_CLASS: structures.LeafClass = structures.LeafClass("int", [], ALLOCATION.STACK, PASSING.VALUE)
         self.VOID_CLASS: structures.LeafClass = structures.LeafClass("void", [], ALLOCATION.STACK, PASSING.VALUE)
         self.BOOL_CLASS: structures.LeafClass = structures.LeafClass("bool", [], ALLOCATION.STACK, PASSING.VALUE)
+        self.FLOAT_CLASS: structures.LeafClass = structures.LeafClass("float", [], ALLOCATION.STACK, PASSING.VALUE)
 
         self._initIntClass()
         self._initVoidClass()
         self._initBoolClass()
-
+        self._initFloatClass()
 
     def getAll(self) -> list[structures.LeafClass]:
         """Returns all the classes"""
@@ -82,7 +83,27 @@ class BaseClasses:
         self.INT_CLASS.operators[OperatorKind.GREATER_THAN] = greaterThanOperator
 
 
+    def _initFloatClass(self) -> None:
 
+        self.FLOAT_CLASS.cName = "float"
+        floatConstructor = structures.LeafFunction("float", [], None, structures.LeafMention(None, self.FLOAT_CLASS, []))
+        floatConstructor.customSignature = lambda x: f"{x}"
+        self.FLOAT_CLASS.constructor = floatConstructor
+
+        sumOperator = structures.LeafFunction("float__operator__SUM", [], None, structures.LeafMention(None, self.FLOAT_CLASS, []))
+        sumOperator.customSignature = _simpleOperatorCustomSignatureConstructor("+")
+        sumOperator.cName = sumOperator.name
+        self.FLOAT_CLASS.operators[OperatorKind.SUM] = sumOperator
+
+        minusOperator = structures.LeafFunction("float__operator__MINUS", [], None, structures.LeafMention(None, self.FLOAT_CLASS, []))
+        minusOperator.customSignature = _simpleOperatorCustomSignatureConstructor("-")
+        minusOperator.cName = minusOperator.name
+        self.FLOAT_CLASS.operators[OperatorKind.MINUS] = minusOperator
+
+        lessThanOperator = structures.LeafFunction("float__operator__LESS_THAN", [], None, structures.LeafMention(None, self.BOOL_CLASS, []))
+        lessThanOperator.customSignature = _simpleOperatorCustomSignatureConstructor("<")
+        lessThanOperator.cName = lessThanOperator.name
+        self.FLOAT_CLASS.operators[OperatorKind.LESS_THAN] = lessThanOperator
 
 
     def _initVoidClass(self) -> None:

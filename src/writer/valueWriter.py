@@ -46,6 +46,8 @@ def writeLeafChain(leafChain: structures.LeafChain, selfString: str | None = Non
             ##CURRENTLY CHAINS CAN ONLY CONTAIN 1 PRIMITIVE
             return f"{element}"
         
+        elif type(element) == float:
+            return f"{element}"
     
     
         else:

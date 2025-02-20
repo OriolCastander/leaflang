@@ -166,7 +166,7 @@ class LeafChain(LeafValue):
         elif type(self.elements[-1]) == LeafMention:
             return self.elements[-1].passing
         
-        elif type(self.elements[-1]) == int:
+        elif type(self.elements[-1]) in [int, float]:
             return PASSING.VALUE
         
         else:
